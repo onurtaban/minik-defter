@@ -8,8 +8,39 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="theme-color" content="#FFF4EC" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C1513" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF6EF" id="themeColor">
+<script>
+/* Görünüm: renk paleti ve açık/koyu mod. İlk boyamadan önce uygulanır. */
+window.MD_PALETTES = {
+  seftali: {ad:"Şeftali", light:{bg:"#FFF6EF",surface2:"#FCEDE3",ink:"#3A2622",muted:"#8A6F68",line:"#F2E2D8",accent:"#C9495C","accent-soft":"#FDE4E6",hero1:"#FFE3D3",hero2:"#FFD3DC"},
+            dark:{accent:"#FF8E9B","accent-soft":"#4A2730",hero1:"#3E2722",hero2:"#3E2230"}},
+  kayisi:  {ad:"Kayısı ve bal", light:{bg:"#FFF8EE",surface2:"#FBEEDB",ink:"#3B2A1E",muted:"#8A735F",line:"#F2E4D0",accent:"#B85C12","accent-soft":"#FFE9CF",hero1:"#FFEBC8",hero2:"#FFD8B5"},
+            dark:{accent:"#FFB066","accent-soft":"#46301A",hero1:"#3F2E1C",hero2:"#3F2619"}},
+  adacayi: {ad:"Pudra ve adaçayı", light:{bg:"#FBF6F1",surface2:"#F1EBE3",ink:"#30302B",muted:"#7A776D",line:"#E9E2D8",accent:"#4C7F67","accent-soft":"#E2EFE6",hero1:"#F8E2D9",hero2:"#E1EEDD"},
+            dark:{accent:"#8FCDAF","accent-soft":"#24372D",hero1:"#3A2925",hero2:"#24342B"}},
+  lavanta: {ad:"Lavanta gün batımı", light:{bg:"#FDF6F3",surface2:"#F5ECEB",ink:"#35283A",muted:"#857487",line:"#EFE2E2",accent:"#7B4BB7","accent-soft":"#EEE4FA",hero1:"#FFE1D5",hero2:"#E8DCFA"},
+            dark:{accent:"#C6A6FF","accent-soft":"#352848",hero1:"#3E2824",hero2:"#30253F"}},
+  karamel: {ad:"Karamel latte", light:{bg:"#FAF4EC",surface2:"#F1E5D7",ink:"#3A2B22",muted:"#86715F",line:"#EADCCB",accent:"#8E5A2F","accent-soft":"#F3E3D0",hero1:"#F3E1CC",hero2:"#E9D1BA"},
+            dark:{accent:"#E3B184","accent-soft":"#453223",hero1:"#3C2C21",hero2:"#36271D"}},
+  mercan:  {ad:"Mercan ve krem", light:{bg:"#FFF8F2",surface2:"#FCEEE4",ink:"#3D2620",muted:"#8D6E64",line:"#F4E2D8",accent:"#C8432C","accent-soft":"#FFE3DA",hero1:"#FFDCCF",hero2:"#FFF0D6"},
+            dark:{accent:"#FF967F","accent-soft":"#4A2820",hero1:"#43251F",hero2:"#3F301E"}}
+};
+window.mdApplyTheme = function(){
+  var pal = "seftali", mode = "auto";
+  try{ pal = localStorage.getItem("minik-defter-palet") || pal; mode = localStorage.getItem("minik-defter-mod") || mode; }catch(e){}
+  var P = window.MD_PALETTES[pal] || window.MD_PALETTES.seftali;
+  var dark = mode==="dark" || (mode==="auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  var root = document.documentElement;
+  root.setAttribute("data-theme", dark ? "dark" : "light");
+  var all = ["bg","surface2","ink","muted","line","accent","accent-soft","hero1","hero2"];
+  all.forEach(function(k){ root.style.removeProperty("--"+k); });
+  var v = dark ? P.dark : P.light;
+  Object.keys(v).forEach(function(k){ root.style.setProperty("--"+k, v[k]); });
+  var tc = document.getElementById("themeColor"); if(tc) tc.setAttribute("content", dark ? "#1C1513" : P.light.bg);
+};
+mdApplyTheme();
+try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){ mdApplyTheme(); }); }catch(e){}
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -256,6 +287,13 @@ nav.tabs button[aria-current="page"]{background:var(--accent-soft);color:var(--a
 .code{border-radius:14px}
 .empty{color:var(--muted)}
 @media (prefers-reduced-motion: no-preference){ #view > *{animation:fadein .25s ease-out both} @keyframes fadein{from{opacity:.4;transform:translateY(4px)}} }
+.palgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.palcard{border:0;background:var(--surface);border-radius:18px;padding:8px 8px 10px;display:flex;flex-direction:column;gap:7px;box-shadow:var(--shadow);min-width:0}
+.palcard[aria-pressed="true"]{box-shadow:inset 0 0 0 2.5px var(--accent), var(--shadow)}
+.palprev{position:relative;height:58px;border-radius:12px;display:block;overflow:hidden}
+.palprev span{position:absolute;left:8px;right:8px;bottom:0;height:22px;border-radius:8px 8px 0 0}
+.palprev i{position:absolute;right:10px;top:9px;width:18px;height:18px;border-radius:50%}
+.palname{font-size:12.5px;font-weight:800;line-height:1.2;text-align:center}
 </style>
 <script src="vendor/supabase.js" defer></script>
 </head>
@@ -865,6 +903,32 @@ document.addEventListener("click", e => {
   const line = card.querySelector(".tipline"); if(line) line.innerHTML = "<b>"+esc(t.getAttribute("data-tip"))+"</b>";
 });
 
+
+/* ---------- Görünüm ---------- */
+function getPref(k, d){ return lsGet(k) || d; }
+function openLook(){
+  const layer = $("#layer");
+  const draw = () => {
+    const pal = getPref("minik-defter-palet","seftali"), mode = getPref("minik-defter-mod","auto");
+    layer.innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet">
+      <div class="head"><h2>Görünüm</h2><button type="button" class="iconbtn" id="sheetX" aria-label="Kapat">${I.x}</button></div>
+      <div class="field"><span class="flabel">Mod</span>
+        <div class="unitseg" style="grid-template-columns:repeat(3,1fr)">${[["auto","Otomatik"],["light","Açık"],["dark","Koyu"]].map(([k,l])=>`<button type="button" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
+        <div class="small muted">Otomatik, telefonun açık/koyu ayarını izler.</div></div>
+      <div class="field"><span class="flabel">Renk teması</span>
+        <div class="palgrid">${Object.entries(window.MD_PALETTES).map(([k,P])=>`<button type="button" class="palcard" data-pal="${k}" aria-pressed="${pal===k}">
+          <span class="palprev" style="background:linear-gradient(135deg,${P.light.hero1},${P.light.hero2})"><span style="background:${P.light.bg}"></span><i style="background:${P.light.accent}"></i></span>
+          <span class="palname">${esc(P.ad)}</span></button>`).join("")}</div>
+        <div class="small muted">Seçim yalnızca bu telefonda geçerlidir.</div></div>
+    </div></div>`;
+    $("#sheetX").onclick = () => { layer.innerHTML = ""; };
+    $("#sheetBg").addEventListener("click", e => { if(e.target.id==="sheetBg") layer.innerHTML = ""; });
+    layer.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { lsSet("minik-defter-mod", b.dataset.mode); window.mdApplyTheme(); draw(); });
+    layer.querySelectorAll("[data-pal]").forEach(b => b.onclick = () => { lsSet("minik-defter-palet", b.dataset.pal); window.mdApplyTheme(); draw(); });
+  };
+  draw();
+}
+
 function viewSetup(){
   return `<div class="setup">
     <p class="muted" style="margin:0">Minik Defter'i iki telefonda ortak kullanmak için bir <b>aile kodu</b> kullanılır. Bir telefonda yeni defter oluşturun, diğerinde aynı kodu girin.</p>
@@ -1105,6 +1169,7 @@ function openSettings(){
     <div class="field"><label for="s-name">Bebeğin adı</label><input id="s-name" name="name" value="${esc(s.name)}" placeholder="ör. Deniz"></div>
     <div class="field"><label for="s-birth">Doğum tarihi</label><input id="s-birth" name="birth" type="date" value="${esc(s.birth)}"></div>
     <div class="field"><span class="flabel">Cinsiyet (büyüme grafiği için)</span>${seg("sex", [["k","Kız"],["e","Erkek"]], s.sex||"k")}</div>
+    <button type="button" class="btn" id="lookBtn">Görünüm: renk teması, açık / koyu</button>
     <button type="button" class="btn" id="famBtn">Aile kodu ve diğer telefonu bağlama</button>`;
   openSheet("Bebek bilgileri", body, (fd, layer) => {
     saveSettings({name:(fd.get("name")||"").trim(), birth:fd.get("birth")||"", sex:segVal(layer,"sex")}); toast("Bilgiler kaydedildi");
@@ -1138,6 +1203,7 @@ document.addEventListener("click", e => {
   if(b.id==="addNote") return openNote();
   if(b.id==="addGrow") return openGrow();
   if(b.id==="settingsBtn") return openSettings();
+  if(b.id==="lookBtn"){ $("#layer").innerHTML=""; return openLook(); }
   if(b.id==="famBtn"){ $("#layer").innerHTML=""; return openFamily(); }
   if(b.id==="clearEx"){ if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent="Emin misiniz? Tekrar dokunun"; return; }
     [...state.items.values()].filter(i=>i.ornek).forEach(i=>remove(i.id)); toast("Örnekler silindi"); return; }
