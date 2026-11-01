@@ -1,5 +1,5 @@
 // Minik Defter service worker: uygulamayı internet yokken de açılabilir tutar.
-const CACHE = "minik-defter-v4";
+const CACHE = "minik-defter-v5";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "vendor/supabase.js", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
