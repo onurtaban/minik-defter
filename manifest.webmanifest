@@ -1,0 +1,16 @@
+{
+  "name": "Minik Defter",
+  "short_name": "Minik Defter",
+  "description": "Bebek bakım defteri: beslenme, uyku, bez, hatırlatıcılar, notlar, aşı ve büyüme takibi.",
+  "lang": "tr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2F3F7",
+  "theme_color": "#2E3A87",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

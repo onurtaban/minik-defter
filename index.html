@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Minik Defter</title>
+<meta name="description" content="Bebek bakım defteri: beslenme, uyku, bez kaydı, hatırlatıcılar, notlar, aşı takvimi ve büyüme takibi.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#2E3A87">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Minik Defter">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+/* Layout: tek sütunlu telefon uygulaması; üstte bebek kartı, altta sabit sekme çubuğu */
+:root{
+  --bg:#F2F3F7; --surface:#FFFFFF; --surface2:#E9EBF2; --ink:#1D2340; --muted:#646A88; --line:#DADDE8;
+  --accent:#2E3A87; --accent-ink:#FFFFFF;
+  --feed:#C9772E; --feed-bg:#FBEBDD; --sleep:#5560C4; --sleep-bg:#E6E8FA; --diaper:#2D8A7B; --diaper-bg:#DCF1ED; --health:#C2475F; --health-bg:#F9E1E6;
+  --ok:#2D8A7B; --warn:#B9761B;
+  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12152A; --surface:#1B1F3A; --surface2:#262B4D; --ink:#ECEEFA; --muted:#A3A8C8; --line:#2F3459;
+  --accent:#AEB7FF; --accent-ink:#141833;
+  --feed:#F0A764; --feed-bg:#3A2A1E; --sleep:#A4ACFF; --sleep-bg:#272C55; --diaper:#6FD0BE; --diaper-bg:#173B37; --health:#F28A9E; --health-bg:#3F1F2A;
+  --ok:#6FD0BE; --warn:#F0B35A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12152A; --surface:#1B1F3A; --surface2:#262B4D; --ink:#ECEEFA; --muted:#A3A8C8; --line:#2F3459;
+  --accent:#AEB7FF; --accent-ink:#141833;
+  --feed:#F0A764; --feed-bg:#3A2A1E; --sleep:#A4ACFF; --sleep-bg:#272C55; --diaper:#6FD0BE; --diaper-bg:#173B37; --health:#F28A9E; --health-bg:#3F1F2A;
+  --ok:#6FD0BE; --warn:#F0B35A; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 96px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;padding-top:calc(14px + env(safe-area-inset-top, 0px))}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;font-weight:700;letter-spacing:-.01em}
+h2{font-size:20px} h3{font-size:16px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Bebek kartı */
+#view{display:flex;flex-direction:column;gap:22px}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hero h1{font-size:26px}
+.age{font-family:var(--f-display);font-size:15px;color:var(--muted);font-weight:500}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;width:42px;height:42px;display:grid;place-items:center;flex:none}
+.iconbtn svg{width:20px;height:20px}
+
+.banner{background:var(--surface2);border-radius:var(--r);padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px;flex-wrap:wrap}
+.banner b{font-weight:700}
+
+/* Hızlı kayıt */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qbtn{border:0;border-radius:var(--r);padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:13px}
+.qbtn svg{width:26px;height:26px}
+.k-feed{background:var(--feed-bg);color:var(--feed)} .k-sleep{background:var(--sleep-bg);color:var(--sleep)}
+.k-diaper{background:var(--diaper-bg);color:var(--diaper)} .k-health{background:var(--health-bg);color:var(--health)}
+.qbtn.live{outline:2px solid currentColor}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border-radius:var(--r);padding:10px 12px;min-width:0}
+.stat .v{font-family:var(--f-display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.since{background:var(--surface);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.since-row{display:flex;justify-content:space-between;gap:10px}
+.since-row span:last-child{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+
+.section{display:flex;flex-direction:column;gap:10px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.link{background:none;border:0;color:var(--accent);font-weight:700;padding:4px 0}
+
+.list{display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);overflow:hidden}
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);min-width:0}
+.row:first-child{border-top:0}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:700;overflow-wrap:anywhere}
+.row .s{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.dot svg{width:18px;height:18px}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.pill.due{background:var(--health-bg);color:var(--health)}
+.pill.soon{background:var(--feed-bg);color:var(--feed)}
+.pill.ok{background:var(--diaper-bg);color:var(--diaper)}
+.pill.idle{background:var(--surface2);color:var(--muted)}
+.ex{font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:0 5px;margin-left:6px}
+.empty{background:var(--surface);border-radius:var(--r);padding:18px;color:var(--muted);text-align:center;font-size:14px}
+.mini{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;white-space:nowrap}
+.mini.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.del{background:none;border:0;color:var(--muted);padding:6px;border-radius:8px}
+.del svg{width:18px;height:18px}
+
+.tip{background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px}
+.tip .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700}
+
+/* Filtre çipleri */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.daylabel{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-top:4px}
+
+/* Sekme çubuğu */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:20;
+  padding-bottom:env(safe-area-inset-bottom, 0px);padding-left:max(8px, env(safe-area-inset-left, 0px));padding-right:max(8px, env(safe-area-inset-right, 0px))}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{background:none;border:0;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--muted)}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+
+/* Sayfa altı form paneli */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,12,30,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;border-radius:20px 20px 0 0;max-height:88%;overflow:auto;
+  padding:18px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));display:flex;flex-direction:column;gap:14px}
+.sheet .head{display:flex;justify-content:space-between;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label,.flabel{font-size:13px;font-weight:700;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+.field textarea{min-height:110px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.actions{display:flex;gap:10px}
+.pickgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick{border:0;border-radius:14px;padding:18px 10px;font-weight:700;font-size:16px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:72px;justify-content:center}
+.pick svg{width:24px;height:24px}
+.pick .small{font-weight:600;opacity:.8}
+.btn{flex:1;border:0;border-radius:12px;padding:13px;font-weight:700;background:var(--surface2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:var(--health-bg);color:var(--health)}
+
+/* Grafik */
+.chartbox{background:var(--surface);border-radius:var(--r);padding:12px}
+.chartbox svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-top:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom, 0px));background:var(--ink);color:var(--bg);
+  padding:12px 16px;border-radius:12px;font-weight:700;z-index:60;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.alarm{position:fixed;inset:auto 0 0 0;z-index:70;display:flex;justify-content:center;padding:0 max(16px, env(safe-area-inset-right, 0px)) calc(90px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.alarm .box{background:var(--health);color:#fff;border-radius:16px;padding:14px 16px;width:100%;max-width:528px;display:flex;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.alarm .box button{background:#fff;color:#7a1c30;border:0;border-radius:10px;padding:8px 12px;font-weight:700}
+.sync{font-size:12px;color:var(--muted);text-align:center}
+details.tipd{background:var(--surface);border-radius:var(--r);padding:12px 14px}
+details.tipd summary{font-weight:700;cursor:pointer;font-family:var(--f-display);font-size:16px}
+details.tipd ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion: no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+@media (max-width:360px){.quick{grid-template-columns:repeat(2,1fr)}}
+.setup{display:flex;flex-direction:column;gap:16px;padding-top:8px}
+.setup .card{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;letter-spacing:.12em;font-weight:700;background:var(--surface2);border-radius:10px;padding:10px 12px;text-align:center;user-select:all;overflow-wrap:anywhere}
+.errtext{color:var(--health);font-size:13px;font-weight:700}
+</style>
+<script src="vendor/supabase.js" defer></script>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <header class="hero">
+    <div>
+      <h1 id="babyName">Bebeğiniz</h1>
+      <div class="age num" id="babyAge">Doğum tarihini ayarlardan girin</div>
+    </div>
+    <button class="iconbtn" id="settingsBtn" aria-label="Bebek bilgileri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+  </header>
+  <div id="view"></div>
+  <div class="sync" id="sync">Kayıtlar yükleniyor…</div>
+</div>
+
+<nav class="tabs" aria-label="Bölümler"><div class="in" id="tabs"></div></nav>
+<div id="layer"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- İkonlar ---------- */
+const I = {
+  feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v3l-2 3v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V9l-2-3V3"/><path d="M8 13h8"/></svg>',
+  sleep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
+  diaper:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v3a9 9 0 0 1-18 0z"/><path d="M8 7v3M16 7v3"/></svg>',
+  health:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 1 1 4 0z"/><path d="M12 14v3"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  log:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg>',
+  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg>',
+  grow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  vax:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2l4 4M15 5l4 4M17 7l-9 9-4 1 1-4 9-9M7 13l4 4M3 21l3-3"/></svg>'
+};
+const KIND = {
+  feed:{ad:"Beslenme",cls:"k-feed"}, sleep:{ad:"Uyku",cls:"k-sleep"}, diaper:{ad:"Bez",cls:"k-diaper"}, health:{ad:"Sağlık",cls:"k-health"}
+};
+
+/* ---------- Yardımcılar ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const pad = n => String(n).padStart(2,"0");
+const DAY = 864e5, HOUR = 36e5;
+const hm = ts => { const d=new Date(ts); return pad(d.getHours())+":"+pad(d.getMinutes()); };
+const ymd = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const AYLAR = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const fmtDate = s => { if(!s) return ""; const d = new Date(s+"T12:00"); return d.getDate()+" "+AYLAR[d.getMonth()]+" "+d.getFullYear(); };
+const startOfDay = ts => { const d=new Date(ts); d.setHours(0,0,0,0); return d.getTime(); };
+function dur(ms){ ms=Math.max(0,ms); const m=Math.round(ms/6e4); const h=Math.floor(m/60), mm=m%60; return h? (h+" sa "+(mm? mm+" dk":"")).trim() : mm+" dk"; }
+function ago(ts){ const d=Date.now()-ts; return d<6e4? "az önce" : dur(d)+" önce"; }
+function dayLabel(ts){ const t=startOfDay(Date.now()), s=startOfDay(ts); if(s===t) return "Bugün"; if(s===t-DAY) return "Dün"; const d=new Date(ts); return d.getDate()+" "+AYLAR[d.getMonth()]; }
+function toLocalInput(ts){ const d=new Date(ts); return ymd(d)+"T"+pad(d.getHours())+":"+pad(d.getMinutes()); }
+
+/* ---------- Durum ve depolama ---------- */
+const LS_KEY = "minik-defter-v1";
+const state = { settings:{name:"", birth:"", sex:"k"}, items:new Map(), tab:"home", logFilter:"all", noteFilter:"all", shared:false, loaded:false };
+/* ---------- Eşitleme (Supabase) ---------- */
+const SB_URL = "https://kbzquokuyrfmweoeyfdp.supabase.co";
+const SB_KEY = "sb_publishable_1hXBaii737jcIeyAqIWKjQ_ycaU-iSh";
+const FAM_KEY = "minik-defter-aile", OUT_KEY = "minik-defter-bekleyen", SINCE_KEY = "minik-defter-son";
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k, String(v)); }catch(e){} }
+let family = lsGet(FAM_KEY);
+let outbox = (()=>{ try{ return JSON.parse(lsGet(OUT_KEY)||"[]"); }catch(e){ return []; } })();
+let since = Number(lsGet(SINCE_KEY)||0);
+let sb = null, chan = null, flushing = false, syncing = false;
+
+function loadLocal(){
+  try{ const raw = localStorage.getItem(LS_KEY); if(!raw) return; const o = JSON.parse(raw);
+    if(o.settings) state.settings = Object.assign(state.settings, o.settings);
+    (o.items||[]).forEach(it => state.items.set(it.id, it));
+  }catch(e){}
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({settings:state.settings, items:[...state.items.values()]})); }catch(e){}
+}
+function toast(msg){
+  document.querySelectorAll(".toast").forEach(t=>t.remove());
+  const el = document.createElement("div"); el.className="toast"; el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2400);
+}
+function client(){
+  if(sb) return sb;
+  try{ if(window.supabase && window.supabase.createClient) sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false, autoRefreshToken:false}}); }catch(e){ sb = null; }
+  return sb;
+}
+function queue(op){
+  outbox = outbox.filter(o => o.id!==op.id); outbox.push(op); lsSet(OUT_KEY, JSON.stringify(outbox)); flush();
+}
+async function flush(){
+  if(flushing || !family || !client() || !outbox.length) { renderSync(); return; }
+  flushing = true; let sent = false;
+  try{
+    while(outbox.length){
+      const o = outbox[0];
+      const r = o.op==="put" ? await sb.rpc("md_put", {p_family:family, p_id:o.id, p_data:o.data})
+                             : await sb.rpc("md_delete", {p_family:family, p_id:o.id});
+      if(r.error) throw r.error;
+      outbox.shift(); lsSet(OUT_KEY, JSON.stringify(outbox)); sent = true;
+    }
+    state.syncErr = false;
+  }catch(e){ state.syncErr = true; }
+  flushing = false;
+  if(sent && chan) { try{ chan.send({type:"broadcast", event:"degisti", payload:{}}); }catch(e){} }
+  renderSync();
+}
+async function sync(){
+  if(syncing || !family || !client()) { renderSync(); return; }
+  syncing = true;
+  try{
+    const r = await sb.rpc("md_get", {p_family:family, p_since:since});
+    if(r.error) throw r.error;
+    let changed = false;
+    for(const row of (r.data||[])){
+      if(row.ts > since) since = row.ts;
+      if(outbox.some(o => o.id===row.id)) continue; // bu cihazdaki gönderilmemiş değişiklik öncelikli
+      const d = row.data || {};
+      if(d._deleted){ if(state.items.delete(row.id)) changed = true; continue; }
+      if(row.id==="settings"){ state.settings = Object.assign({name:"",birth:"",sex:"k"}, d); changed = true; continue; }
+      state.items.set(row.id, Object.assign({}, d, {id:row.id})); changed = true;
+    }
+    lsSet(SINCE_KEY, since); state.syncErr = false; state.loaded = true; state.lastSync = Date.now();
+    if(changed){ saveLocal(); if(!$("#sheetBg")) render(); }
+  }catch(e){ state.syncErr = true; }
+  syncing = false; renderSync();
+}
+function connectLive(){
+  if(!family || !client() || chan) return;
+  try{ chan = sb.channel("aile-"+family); chan.on("broadcast", {event:"degisti"}, () => sync()).subscribe(); }catch(e){ chan = null; }
+}
+function renderSync(){
+  const el = $("#sync"); if(!el) return;
+  if(!family){ el.textContent = ""; return; }
+  if(outbox.length) el.textContent = (navigator.onLine===false? "İnternet yok. ":"") + outbox.length+" değişiklik gönderilmeyi bekliyor; bağlantı gelince otomatik gönderilecek.";
+  else if(state.syncErr) el.textContent = "Sunucuya ulaşılamadı, bu cihazdaki kayıtlar gösteriliyor.";
+  else if(state.lastSync) el.textContent = "Aile defteri eşitlendi · "+hm(state.lastSync);
+  else el.textContent = "Eşitleniyor…";
+}
+async function put(item){
+  item.u = Date.now(); delete item.ornek;
+  state.items.set(item.id, item); saveLocal(); render();
+  queue({op:"put", id:item.id, data:JSON.parse(JSON.stringify(item))});
+}
+async function remove(id){
+  state.items.delete(id); saveLocal(); render();
+  queue({op:"del", id});
+}
+async function saveSettings(s){
+  state.settings = s; saveLocal(); render();
+  queue({op:"put", id:"settings", data:Object.assign({type:"settings"}, s)});
+}
+const all = type => [...state.items.values()].filter(i => i.type===type);
+
+/* ---------- Bebek yaşı ---------- */
+function ageParts(){
+  const b = state.settings.birth; if(!b) return null;
+  const bd = new Date(b+"T00:00"), now = new Date();
+  let m = (now.getFullYear()-bd.getFullYear())*12 + now.getMonth()-bd.getMonth();
+  let anchor = new Date(bd); anchor.setMonth(bd.getMonth()+m);
+  if(anchor>now){ m--; anchor = new Date(bd); anchor.setMonth(bd.getMonth()+m); }
+  const days = Math.floor((now-anchor)/DAY);
+  return {months:m, days, totalDays:Math.floor((now-bd)/DAY), ageMonthsFloat:(now-bd)/(DAY*30.4375)};
+}
+function ageText(){
+  const a = ageParts(); if(!a) return "Doğum tarihini girmek için sağ üstteki düğmeye dokunun";
+  const parts=[]; if(a.months) parts.push(a.months+" aylık"); if(a.days) parts.push(a.days+" günlük"); if(!parts.length) parts.push("Bugün doğdu");
+  return parts.join(", ")+" · "+a.totalDays+". gün";
+}
+
+/* ---------- Hatırlatıcı mantığı ---------- */
+function remDue(r){
+  const now = Date.now();
+  if(r.mode==="interval"){ const base = r.lastDone || r.t; return base + (Number(r.every)||3)*HOUR; }
+  const [h,m] = (r.time||"09:00").split(":").map(Number);
+  if(r.mode==="once"){ if(r.lastDone) return null; const d=new Date((r.date||ymd(new Date()))+"T00:00"); d.setHours(h,m,0,0); return d.getTime(); }
+  const d = new Date(); d.setHours(h,m,0,0); let c = d.getTime();
+  if(r.lastDone && r.lastDone >= c) c += DAY;
+  if(!r.lastDone && c < (r.t||0)) c += DAY; // eklendiği andan önceki saat bugün için sayılmaz
+  return c;
+}
+function remStatus(r){
+  const due = remDue(r); if(due==null) return {cls:"ok", text:"Tamamlandı", due};
+  const diff = due-Date.now();
+  if(diff<=0) return {cls:"due", text:"Zamanı geldi", due};
+  if(diff<=HOUR) return {cls:"soon", text:dur(diff)+" sonra", due};
+  const sameDay = startOfDay(due)===startOfDay(Date.now());
+  return {cls:"idle", text:(sameDay?"Bugün ":dayLabel(due)+" ")+hm(due), due};
+}
+function remDesc(r){
+  if(r.mode==="interval") return "Her "+r.every+" saatte bir";
+  if(r.mode==="once") return fmtDate(r.date)+" "+r.time+" · tek sefer";
+  return "Her gün "+r.time;
+}
+function markDone(r){ const due = remDue(r)||Date.now(); put(Object.assign({}, r, {lastDone: Math.max(Date.now(), r.mode==="daily"? due : Date.now())})); }
+
+/* ---------- Aşı takvimi (T.C. Sağlık Bakanlığı rutin programı, 0-24 ay) ---------- */
+const VAX = [
+  {k:"hepb1", ay:0, ad:"Hepatit B", doz:"1. doz", zaman:"Doğumda"},
+  {k:"hepb2", ay:1, ad:"Hepatit B", doz:"2. doz", zaman:"1. ay sonu"},
+  {k:"bcg", ay:2, ad:"BCG (verem)", doz:"Tek doz", zaman:"2. ay sonu"},
+  {k:"karma1", ay:2, ad:"Karma aşı (DaBT-İPA-Hib)", doz:"1. doz", zaman:"2. ay sonu"},
+  {k:"kpa1", ay:2, ad:"KPA (pnömokok)", doz:"1. doz", zaman:"2. ay sonu"},
+  {k:"karma2", ay:4, ad:"Karma aşı (DaBT-İPA-Hib)", doz:"2. doz", zaman:"4. ay sonu"},
+  {k:"kpa2", ay:4, ad:"KPA (pnömokok)", doz:"2. doz", zaman:"4. ay sonu"},
+  {k:"hepb3", ay:6, ad:"Hepatit B", doz:"3. doz", zaman:"6. ay sonu"},
+  {k:"karma3", ay:6, ad:"Karma aşı (DaBT-İPA-Hib)", doz:"3. doz", zaman:"6. ay sonu"},
+  {k:"opa1", ay:6, ad:"OPA (ağızdan çocuk felci)", doz:"1. doz", zaman:"6. ay sonu"},
+  {k:"kkk1", ay:12, ad:"KKK (kızamık-kızamıkçık-kabakulak)", doz:"1. doz", zaman:"12. ay sonu"},
+  {k:"suc", ay:12, ad:"Suçiçeği", doz:"Tek doz", zaman:"12. ay sonu"},
+  {k:"kpa3", ay:12, ad:"KPA (pnömokok)", doz:"Rapel", zaman:"12. ay sonu"},
+  {k:"karma4", ay:18, ad:"Karma aşı (DaBT-İPA-Hib)", doz:"Rapel", zaman:"18. ay sonu"},
+  {k:"opa2", ay:18, ad:"OPA (ağızdan çocuk felci)", doz:"2. doz", zaman:"18. ay sonu"},
+  {k:"hepa1", ay:18, ad:"Hepatit A", doz:"1. doz", zaman:"18. ay sonu"},
+  {k:"hepa2", ay:24, ad:"Hepatit A", doz:"2. doz", zaman:"24. ay sonu"}
+];
+function vaxDueDate(v){ const b=state.settings.birth; if(!b) return null; const d=new Date(b+"T12:00"); d.setMonth(d.getMonth()+v.ay); return d; }
+function pastVax(){ return VAX.filter(v => { const d=vaxDueDate(v); return d && d.getTime()<Date.now() && !vaxDone(v); }); }
+function vaxDone(v){ const it = state.items.get("vax-"+v.k); return it && it.done ? it : null; }
+
+/* ---------- DSÖ ağırlık ortancası (kg, 0-12 ay) ---------- */
+const WHO = { e:[3.3,4.5,5.6,6.4,7.0,7.5,7.9,8.3,8.6,8.9,9.2,9.4,9.6], k:[3.2,4.2,5.1,5.8,6.4,6.9,7.3,7.6,7.9,8.2,8.5,8.7,8.9] };
+
+/* ---------- Aylara göre rehber ---------- */
+const GUIDE = {
+  4:{baslik:"4. ay", maddeler:[
+    "Başını dik tutar, karın üstündeyken kollarıyla doğrulmaya çalışır.",
+    "Türkiye'de 4. aydan itibaren demir desteği önerilir, dozu için aile hekiminize danışın.",
+    "Günde 12-16 saat uyku normaldir; uyku düzeni değişebilir (4. ay gerilemesi)."]},
+  5:{baslik:"5. ay", maddeler:[
+    "Sırttan karna yuvarlanmaya başlayabilir. Onu yatak, kanepe gibi yüksek yüzeylerde yalnız bırakmayın.",
+    "Her şeyi ağzına götürür. Yutabileceği küçük nesneleri ulaşamayacağı yere kaldırın.",
+    "Günde 2-3 gündüz uykusu ve 12-15 saat toplam uyku tipiktir. Uykuya her zaman sırtüstü yatırın.",
+    "Sesli güler, kendi adına tepki vermeye başlar. Bol konuşun, şarkı söyleyin, kitaba birlikte bakın.",
+    "Ek gıdaya henüz geçmeyin; DSÖ ve Sağlık Bakanlığı 6 ay tamamlanınca başlamayı önerir. Bu ay hazırlık işaretlerini izleyin: desteksiz oturmaya yakın olmak, yemeğe ilgi, dili itme refleksinin azalması."]},
+  6:{baslik:"6. ay", maddeler:[
+    "Ek gıdaya başlama zamanı. Tek malzemeli, püre kıvamında başlayın ve yeni bir besini 3 gün arayla ekleyin.",
+    "Demirden zengin besinler önceliklidir: et püresi, yumurta sarısı, mercimek.",
+    "Bal 1 yaşından önce verilmez. İnek sütü içecek olarak 1 yaşa kadar önerilmez.",
+    "Ek gıdayla birlikte bardaktan küçük yudumlarla su verilebilir.",
+    "İlk dişler çıkabilir; diş eti kaşıntısı ve salya artışı olağandır.",
+    "6. ay sonunda Hepatit B, karma aşı ve OPA dozları var."]},
+  7:{baslik:"7. ay", maddeler:[
+    "Desteksiz oturur, emeklemeye hazırlanır. Ev güvenliğini (priz, köşe, merdiven) gözden geçirin.",
+    "Yabancı kaygısı başlayabilir; bu gelişimin normal bir parçasıdır.",
+    "Ezilmiş, hafif pütürlü kıvamlara geçebilirsiniz."]}
+};
+const ALWAYS = [
+  "D vitamini 1 yaşına kadar her gün verilir (Sağlık Bakanlığı tarafından ücretsiz dağıtılır).",
+  "3 aydan büyük bebekte 38 °C üzeri ateş, beslenmeyi reddetme, 6 saatten uzun süre ıslak bez olmaması, nefes almakta zorlanma veya sürekli ağlama varsa doktora başvurun. Acil durumda 112."
+];
+const DAILY_TIPS = [
+  "Karın üstü oyun zamanı (tummy time) boyun ve sırt kaslarını güçlendirir. Gün içinde birkaç kez, uyanıkken yapın.",
+  "Aynaya baktırın: bu yaşta kendi yüzüne büyük ilgi duyar.",
+  "Uyku öncesi aynı küçük rutini (banyo, masaj, ninni) her gün tekrarlamak uykuya geçişi kolaylaştırır.",
+  "Farklı dokulardaki oyuncaklar (yumuşak, pürüzlü, hışırtılı) duyusal gelişimi destekler.",
+  "Ona ne yaptığınızı anlatın: \"Şimdi bezini değiştiriyoruz.\" Dil gelişimi bu konuşmalarla başlar.",
+  "Doktor kontrolüne gitmeden önce sorularınızı Notlar'da 'Doktora sorulacak' etiketiyle toplayın.",
+  "Bebeğin kendi kendine sakinleşmesine kısa fırsatlar tanımak uyku düzenine yardımcı olabilir.",
+  "Kendinize de bakın: ebeveynlerin dinlenmesi bebeğin bakımı kadar önemli. Gece nöbetlerini paylaşmayı deneyin."
+];
+
+/* ---------- Ekranlar ---------- */
+const TABS = [["home","Bugün",I.home],["log","Kayıtlar",I.log],["rem","Hatırlatıcı",I.bell],["notes","Notlar",I.note],["grow","Gelişim",I.grow]];
+function renderTabs(){
+  $("#tabs").innerHTML = TABS.map(([k,l,ic]) => `<button data-tab="${k}" ${state.tab===k?'aria-current="page"':""}>${ic}<span>${l}</span></button>`).join("");
+}
+function logLine(l){
+  const k = KIND[l.kind]||KIND.health;
+  let t = l.sub||k.ad, s = "";
+  if(l.kind==="sleep"){ t="Uyku"; s = l.end? hm(l.start)+" – "+hm(l.end)+" · "+dur(l.end-l.start) : hm(l.start)+" – devam ediyor ("+dur(Date.now()-l.start)+")"; }
+  else { s = hm(l.start); if(l.amount) s += " · "+l.amount+(l.kind==="health"? " °C" : l.sub==="Biberon"||l.sub==="Mama"? " ml" : l.sub&&l.sub.startsWith("Emzirme")? " dk":""); }
+  if(l.note) s += " · "+l.note;
+  return `<div class="row"><div class="dot ${k.cls}">${I[l.kind]||I.health}</div><div class="main"><div class="t">${esc(t)}${l.ornek?'<span class="ex">örnek</span>':""}</div><div class="s num">${esc(s)}</div></div>
+    ${l.kind==="sleep"&&!l.end?`<button class="mini primary" data-wake="${l.id}">Uyandı</button>`:""}<button class="del" aria-label="Düzenle" data-editlog="${l.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button></div>`;
+}
+function remRow(r){
+  const st = remStatus(r);
+  return `<div class="row"><div class="dot k-sleep">${I.bell}</div><div class="main"><div class="t">${esc(r.title)}${r.ornek?'<span class="ex">örnek</span>':""}</div><div class="s">${esc(remDesc(r))}</div></div>
+    <span class="pill ${st.cls} num">${esc(st.text)}</span>${st.due!=null && st.cls!=="idle"?`<button class="mini primary" data-done="${r.id}">Yapıldı</button>`:""}<button class="del" aria-label="Düzenle" data-editrem="${r.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button></div>`;
+}
+function hasExamples(){ return [...state.items.values()].some(i => i.ornek); }
+
+function viewHome(){
+  const logs = all("log").sort((a,b)=>b.start-a.start);
+  const today = startOfDay(Date.now());
+  const tLogs = logs.filter(l => l.start>=today);
+  const feeds = tLogs.filter(l=>l.kind==="feed").length;
+  const diapers = tLogs.filter(l=>l.kind==="diaper").length;
+  let sleepMs = 0; logs.filter(l=>l.kind==="sleep").forEach(l => { const s=Math.max(l.start,today), e=l.end||Date.now(); if(e>s) sleepMs += e-s; });
+  const lastFeed = logs.find(l=>l.kind==="feed"), lastDiaper = logs.find(l=>l.kind==="diaper");
+  const lastBreast = logs.find(l=>l.kind==="feed" && /Emzirme/.test(l.sub||""));
+  const sleeping = logs.find(l=>l.kind==="sleep" && !l.end);
+  const lastWake = logs.filter(l=>l.kind==="sleep"&&l.end).sort((a,b)=>b.end-a.end)[0];
+  const rems = all("rem").filter(r=>r.active!==false).map(r=>({r, st:remStatus(r)})).filter(x=>x.st.due!=null).sort((a,b)=>a.st.due-b.st.due).slice(0,3);
+  const a = ageParts();
+  const nextVax = a ? VAX.find(v => !vaxDone(v)) : null;
+  const tip = DAILY_TIPS[Math.floor(Date.now()/DAY) % DAILY_TIPS.length];
+  const loading = !state.loaded && !state.items.size;
+  return `
+  ${hasExamples()?`<div class="banner"><span><b>Örnek kayıtlar gösteriliyor.</b> Uygulamayı tanımanız için eklendi.</span><button class="mini" id="clearEx">Örnekleri sil</button></div>`:""}
+  <section class="section"><div class="quick">
+    <button class="qbtn k-feed" data-quick="feed">${I.feed}Beslenme</button>
+    <button class="qbtn k-sleep ${sleeping?"live":""}" data-quick="sleep">${I.sleep}${sleeping?"Uyandı":"Uyudu"}</button>
+    <button class="qbtn k-diaper" data-quick="diaper">${I.diaper}Bez</button>
+    <button class="qbtn k-health" data-quick="health">${I.health}Sağlık</button>
+  </div></section>
+  <section class="since">
+    ${sleeping?`<div class="since-row"><span>Uyuyor</span><span>${dur(Date.now()-sleeping.start)}</span></div>`: lastWake?`<div class="since-row"><span>Uyanık</span><span>${dur(Date.now()-lastWake.end)}</span></div>`:""}
+    <div class="since-row"><span>Son beslenme</span><span>${lastFeed? esc((lastFeed.sub||"")+" · "+ago(lastFeed.start)) : "—"}</span></div>
+    ${lastBreast?`<div class="since-row"><span>Son emzirilen taraf</span><span>${/Sol/.test(lastBreast.sub)?"Sol":/Sağ/.test(lastBreast.sub)?"Sağ":"—"} → sıradaki ${/Sol/.test(lastBreast.sub)?"Sağ":"Sol"}</span></div>`:""}
+    <div class="since-row"><span>Son bez değişimi</span><span>${lastDiaper? ago(lastDiaper.start) : "—"}</span></div>
+  </section>
+  <section class="stats">
+    <div class="stat"><div class="v">${feeds}</div><div class="l">Beslenme</div></div>
+    <div class="stat"><div class="v">${(sleepMs/HOUR).toFixed(1).replace(".",",")}<span class="small"> sa</span></div><div class="l">Uyku</div></div>
+    <div class="stat"><div class="v">${diapers}</div><div class="l">Bez</div></div>
+  </section>
+  <section class="section"><div class="sec-head"><h2>Sıradaki hatırlatıcılar</h2><button class="link" data-go="rem">Tümü</button></div>
+    ${rems.length? `<div class="list">${rems.map(x=>remRow(x.r)).join("")}</div>` : `<div class="empty">${loading?"Yükleniyor…":"Henüz hatırlatıcı yok. D vitamini, ilaç ya da beslenme saati için bir tane ekleyin."}</div>`}
+  </section>
+  ${nextVax?`<section class="section"><div class="sec-head"><h2>Sıradaki aşı</h2><button class="link" data-go="grow">Takvim</button></div>
+    <div class="list"><div class="row"><div class="dot k-health">${I.vax}</div><div class="main"><div class="t">${esc(nextVax.ad)} · ${esc(nextVax.doz)}</div><div class="s">${esc(nextVax.zaman)} · ${fmtDate(ymd(vaxDueDate(nextVax)))}</div></div>${vaxPill(nextVax)}</div></div>${pastVax().length>1?`<div class="small muted">Geçmiş aşılar yapıldıysa Gelişim sekmesinden tek dokunuşla işaretleyebilirsiniz.</div>`:""}</section>`:""}
+  <section class="tip"><div class="eyebrow">Günün önerisi</div><div>${esc(tip)}</div></section>
+  <section class="section"><div class="sec-head"><h2>Bugün</h2><button class="link" data-go="log">Tüm kayıtlar</button></div>
+    ${tLogs.length? `<div class="list">${tLogs.slice(0,6).map(logLine).join("")}</div>` : `<div class="empty">${loading?"Yükleniyor…":"Bugün henüz kayıt yok. Yukarıdaki düğmelerle tek dokunuşla ekleyin."}</div>`}
+  </section>`;
+}
+function vaxPill(v){
+  const d = vaxDueDate(v); if(!d) return "";
+  const diff = d.getTime()-Date.now();
+  if(diff < -7*DAY) return `<span class="pill due">Gecikmiş</span>`;
+  if(diff <= 14*DAY) return `<span class="pill soon">${diff<0?"Zamanı geldi":Math.ceil(diff/DAY)+" gün kaldı"}</span>`;
+  return `<span class="pill idle">${Math.round(diff/DAY)} gün</span>`;
+}
+
+function viewLog(){
+  const f = state.logFilter;
+  const logs = all("log").filter(l => f==="all" || l.kind===f).sort((a,b)=>b.start-a.start);
+  const groups = []; let cur = null;
+  logs.forEach(l => { const k = startOfDay(l.start); if(!cur||cur.k!==k){ cur={k, items:[]}; groups.push(cur); } cur.items.push(l); });
+  const chip = (k,l) => `<button class="chip" data-lf="${k}" aria-pressed="${f===k}">${l}</button>`;
+  return `<section class="section"><div class="sec-head"><h2>Kayıtlar</h2><button class="mini primary" id="addLog">+ Kayıt ekle</button></div>
+    <div class="chips">${chip("all","Tümü")}${chip("feed","Beslenme")}${chip("sleep","Uyku")}${chip("diaper","Bez")}${chip("health","Sağlık")}</div>
+    ${groups.length? groups.map(g=>`<div class="daylabel">${dayLabel(g.k)}</div><div class="list">${g.items.map(logLine).join("")}</div>`).join("") : `<div class="empty">Bu türde kayıt yok.</div>`}
+  </section>`;
+}
+function viewRem(){
+  const rems = all("rem").map(r=>({r,st:remStatus(r)})).sort((a,b)=> (a.st.due==null)-(b.st.due==null) || (a.st.due||0)-(b.st.due||0));
+  return `<section class="section"><div class="sec-head"><h2>Hatırlatıcılar</h2><button class="mini primary" id="addRem">+ Ekle</button></div>
+    ${rems.length? `<div class="list">${rems.map(x=>remRow(x.r)).join("")}</div>` : `<div class="empty">Henüz hatırlatıcı yok.</div>`}
+    <div class="small muted">Hazır öneriler:</div>
+    <div class="chips" style="flex-wrap:wrap">
+      <button class="chip" data-preset="D vitamini|daily|09:00">D vitamini · 09:00</button>
+      <button class="chip" data-preset="Demir damlası|daily|10:00">Demir damlası · 10:00</button>
+      <button class="chip" data-preset="Beslenme|interval|3">Her 3 saatte beslenme</button>
+      <button class="chip" data-preset="Karın üstü oyun|daily|11:00">Karın üstü oyun · 11:00</button>
+      <button class="chip" data-preset="Banyo|daily|19:30">Banyo · 19:30</button>
+    </div>
+    <div class="small muted">Uyarılar uygulama açıkken ekranda ve sesle gelir. Uygulama kapalıyken bildirim gönderemez; kritik ilaç saatleri için telefonun alarmını da kurun.</div>
+  </section>`;
+}
+const NTAGS = {genel:"Genel", doktor:"Doktora sorulacak", ilk:"İlkler ve anılar", alisveris:"Alışveriş"};
+function viewNotes(){
+  const f = state.noteFilter;
+  const notes = all("note").filter(n => f==="all"||n.tag===f).sort((a,b)=> (b.pinned?1:0)-(a.pinned?1:0) || b.t-a.t);
+  const chip = (k,l) => `<button class="chip" data-nf="${k}" aria-pressed="${f===k}">${l}</button>`;
+  return `<section class="section"><div class="sec-head"><h2>Notlar</h2><button class="mini primary" id="addNote">+ Not</button></div>
+    <div class="chips">${chip("all","Tümü")}${Object.entries(NTAGS).map(([k,l])=>chip(k,l)).join("")}</div>
+    ${notes.length? `<div class="list">${notes.map(n=>`<div class="row" style="align-items:flex-start"><div class="main" data-editnote="${n.id}" style="cursor:pointer">
+      <div class="s">${esc(NTAGS[n.tag]||"Genel")} · ${dayLabel(n.t)}${n.pinned?" · sabit":""}${n.ornek?'<span class="ex">örnek</span>':""}</div>
+      <div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.text)}</div></div></div>`).join("")}</div>` : `<div class="empty">Bu etikette not yok.</div>`}
+  </section>`;
+}
+function growthChart(){
+  const pts = all("grow").filter(g=>g.kg && state.settings.birth).map(g=>({m:(new Date(g.date+"T12:00")-new Date(state.settings.birth+"T00:00"))/(DAY*30.4375), kg:Number(g.kg)})).filter(p=>p.m>=0&&p.m<=12.5).sort((a,b)=>a.m-b.m);
+  const ref = WHO[state.settings.sex==="e"?"e":"k"];
+  const W=320,H=180,L=34,R=10,T=12,B=26, maxKg = Math.max(11, ...pts.map(p=>p.kg+0.5));
+  const x = m => L + (m/12)*(W-L-R), y = kg => T + (1-(kg-2)/(maxKg-2))*(H-T-B);
+  let g = "";
+  for(let kg=2; kg<=maxKg; kg+=2) g += `<line x1="${L}" x2="${W-R}" y1="${y(kg)}" y2="${y(kg)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(kg)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${kg}</text>`;
+  for(let m=0; m<=12; m+=3) g += `<text x="${x(m)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${m} ay</text>`;
+  const refPath = ref.map((kg,m)=>(m?"L":"M")+x(m).toFixed(1)+","+y(kg).toFixed(1)).join("");
+  g += `<path d="${refPath}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  if(pts.length){
+    g += `<path d="${pts.map((p,i)=>(i?"L":"M")+x(p.m).toFixed(1)+","+y(p.kg).toFixed(1)).join("")}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    pts.forEach((p,i)=> g += `<circle cx="${x(p.m)}" cy="${y(p.kg)}" r="${i===pts.length-1?4.5:3}" fill="var(--accent)"/>`);
+    const lp = pts[pts.length-1];
+    g += `<text x="${Math.min(x(lp.m)+8, W-R-30)}" y="${y(lp.kg)-8}" font-size="11" font-weight="700" fill="var(--ink)">${String(lp.kg).replace(".",",")} kg</text>`;
+  }
+  return `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kilo grafiği">${g}</svg>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Bebeğiniz (kg)</span><span><i style="background:var(--muted)"></i>DSÖ ortanca (${state.settings.sex==="e"?"erkek":"kız"})</span></div></div>`;
+}
+function viewGrow(){
+  const a = ageParts();
+  const grows = all("grow").sort((x,y)=> y.date.localeCompare(x.date));
+  const m = a? a.months : 5;
+  const g = GUIDE[Math.min(7, Math.max(4, m))], gNext = GUIDE[Math.min(7, Math.max(4, m)+1)];
+  return `
+  <section class="section"><div class="sec-head"><h2>Büyüme</h2><button class="mini primary" id="addGrow">+ Ölçüm</button></div>
+    ${state.settings.birth? growthChart() : `<div class="empty">Grafik için bebek bilgilerinden doğum tarihini girin.</div>`}
+    ${grows.length? `<div class="list">${grows.map(r=>`<div class="row"><div class="main"><div class="t num">${[r.kg&&String(r.kg).replace(".",",")+" kg", r.cm&&String(r.cm).replace(".",",")+" cm", r.head&&"baş "+String(r.head).replace(".",",")+" cm"].filter(Boolean).join(" · ")}${r.ornek?'<span class="ex">örnek</span>':""}</div><div class="s">${fmtDate(r.date)}${r.note?" · "+esc(r.note):""}</div></div><button class="del" aria-label="Sil" data-delgrow="${r.id}">${I.trash}</button></div>`).join("")}</div>` : `<div class="empty">Henüz ölçüm yok. Kontrolde ölçülen kilo ve boyu ekleyin.</div>`}
+  </section>
+  <section class="section"><div class="sec-head"><h2>Aşı takvimi</h2>${pastVax().length?`<button class="mini" id="vaxPast">Geçmiş ${pastVax().length} aşıyı yapıldı say</button>`:""}</div>
+    <div class="list">${VAX.map(v=>{ const d=vaxDueDate(v), done=vaxDone(v);
+      return `<div class="row"><div class="main"><div class="t">${esc(v.ad)} · ${esc(v.doz)}</div><div class="s">${esc(v.zaman)}${d?" · "+fmtDate(ymd(d)):""}${done&&done.date?" · yapıldı "+fmtDate(done.date):""}</div></div>
+      ${done?`<span class="pill ok">Yapıldı</span>`:vaxPill(v)}<button class="mini ${done?"":"primary"}" data-vax="${v.k}">${done?"Geri al":"İşaretle"}</button></div>`; }).join("")}</div>
+    <div class="small muted">Sağlık Bakanlığı rutin aşı takvimine göre hazırlanmıştır. Tarihler doğum tarihinden hesaplanır; kesin plan için aile hekiminizle doğrulayın. Rotavirüs, meningokok gibi isteğe bağlı aşıları Notlar'a ekleyebilirsiniz.</div>
+  </section>
+  <section class="section"><h2>Bu döneme dair</h2>
+    <details class="tipd" open><summary>${esc(g.baslik)} için öneriler</summary><ul>${g.maddeler.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>
+    ${gNext && gNext!==g?`<details class="tipd"><summary>Yaklaşan: ${esc(gNext.baslik)}</summary><ul>${gNext.maddeler.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>`:""}
+    <details class="tipd"><summary>Her zaman akılda</summary><ul>${ALWAYS.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>
+    <div class="small muted">Bu bilgiler genel rehberliktir, doktor tavsiyesinin yerini tutmaz.</div>
+  </section>`;
+}
+
+function viewSetup(){
+  return `<div class="setup">
+    <p class="muted" style="margin:0">Minik Defter'i iki telefonda ortak kullanmak için bir <b>aile kodu</b> kullanılır. Bir telefonda yeni defter oluşturun, diğerinde aynı kodu girin.</p>
+    <form class="card" id="newFam" novalidate>
+      <h2>Yeni aile defteri</h2>
+      <div class="field"><label for="n-name">Bebeğin adı</label><input id="n-name" name="name" placeholder="ör. Deniz" autocomplete="off"></div>
+      <div class="field"><label for="n-birth">Doğum tarihi</label><input id="n-birth" name="birth" type="date"></div>
+      <div class="field"><span class="flabel">Cinsiyet (büyüme grafiği için)</span>${seg("sex", [["k","Kız"],["e","Erkek"]], "k")}</div>
+      <button class="btn primary" type="submit">Defteri oluştur</button>
+    </form>
+    <form class="card" id="joinFam" novalidate>
+      <h2>Var olan deftere bağlan</h2>
+      <div class="field"><label for="j-code">Aile kodu</label><input id="j-code" name="code" placeholder="ör. K7MP-Q2XA-9RTD" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+      <div class="errtext" id="joinErr" hidden></div>
+      <button class="btn" type="submit">Bağlan</button>
+    </form>
+  </div>`;
+}
+function newCode(){
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", b = new Uint32Array(12); crypto.getRandomValues(b);
+  return [...b].map(x => A[x % A.length]).join("");
+}
+const showCode = c => c ? c.match(/.{1,4}/g).join("-") : "";
+function setFamily(c){ family = c; lsSet(FAM_KEY, c); since = 0; lsSet(SINCE_KEY, 0); connectLive(); }
+document.addEventListener("submit", async e => {
+  if(e.target.id==="newFam"){
+    e.preventDefault(); const fd = new FormData(e.target);
+    const sexSeg = e.target.querySelector('.seg[data-name="sex"]');
+    state.items = new Map(); outbox = []; lsSet(OUT_KEY, "[]");
+    setFamily(newCode()); state.loaded = true;
+    saveSettings({name:(fd.get("name")||"").trim(), birth:fd.get("birth")||"", sex:sexSeg.dataset.val||"k"});
+    state.tab = "home"; render(); setTimeout(openFamily, 300);
+  }
+  if(e.target.id==="joinFam"){
+    e.preventDefault();
+    const code = (new FormData(e.target).get("code")||"").toString().toUpperCase().replace(/[^A-Z0-9]/g,"");
+    const err = $("#joinErr"); err.hidden = true;
+    const fail = m => { err.textContent = m; err.hidden = false; };
+    if(code.length!==12) return fail("Kod 12 karakter olmalı (tireler hariç).");
+    if(!client()) return fail("Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.");
+    const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Kontrol ediliyor…";
+    const r = await sb.rpc("md_exists", {p_family:code});
+    btn.disabled = false; btn.textContent = "Bağlan";
+    if(r.error) return fail("Sunucuya ulaşılamadı. Biraz sonra tekrar deneyin.");
+    if(!r.data) return fail("Bu koda ait bir defter bulunamadı. Kodu kontrol edin.");
+    state.items = new Map(); outbox = []; lsSet(OUT_KEY, "[]"); state.settings = {name:"", birth:"", sex:"k"};
+    setFamily(code); state.tab = "home"; render(); await sync(); toast("Aile defterine bağlandı");
+  }
+});
+document.addEventListener("click", e => {
+  const sg = e.target.closest("#newFam .seg button"); if(!sg) return;
+  const seg = sg.parentElement; seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===sg)); seg.dataset.val = sg.dataset.v;
+});
+function openFamily(){
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet">
+    <div class="head"><h2>Aile kodu</h2><button type="button" class="iconbtn" id="sheetX" aria-label="Kapat">${I.x}</button></div>
+    <p style="margin:0">Diğer ebeveynin telefonunda Minik Defter'i açıp <b>Var olan deftere bağlan</b> bölümüne bu kodu girin. Kodu bilen herkes kayıtları görebilir, yalnızca aile içinde paylaşın.</p>
+    <div class="code" id="famCode">${showCode(family)}</div>
+    <div class="actions"><button type="button" class="btn primary" id="copyCode">Kodu kopyala</button></div>
+    <div class="actions"><button type="button" class="btn danger" id="leaveFam">Bu telefonda defterden çık</button></div>
+    <div class="small muted">Çıkış yapmak kayıtları silmez; kodla yeniden bağlanabilirsiniz.</div>
+  </div></div>`;
+  const close = () => { layer.innerHTML=""; };
+  $("#sheetX").onclick = close;
+  $("#sheetBg").addEventListener("click", e => { if(e.target.id==="sheetBg") close(); });
+  $("#copyCode").onclick = async () => {
+    try{ await navigator.clipboard.writeText(showCode(family)); toast("Kod kopyalandı"); }
+    catch(e){ const r = document.createRange(); r.selectNodeContents($("#famCode")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Kodu seçtim, kopyalayabilirsiniz"); }
+  };
+  let armed = false;
+  $("#leaveFam").onclick = ev => {
+    if(outbox.length){ toast("Önce bekleyen değişikliklerin gönderilmesi gerekiyor."); flush(); return; }
+    if(!armed){ armed = true; ev.target.textContent = "Emin misiniz? Tekrar dokunun"; return; }
+    try{ if(chan) chan.unsubscribe(); }catch(e){} chan = null;
+    family = null; lsSet(FAM_KEY, null); lsSet(SINCE_KEY, 0); state.items = new Map(); state.settings = {name:"",birth:"",sex:"k"}; saveLocal(); close(); render();
+  };
+}
+
+function render(){
+  $("#babyName").textContent = state.settings.name || "Bebeğiniz";
+  $("#babyAge").textContent = ageText();
+  renderTabs();
+  $("nav.tabs").hidden = !family; $("#settingsBtn").hidden = !family;
+  if(!family){ $("#babyName").textContent = "Minik Defter"; $("#babyAge").textContent = "Bebek bakım defteri"; $("#view").innerHTML = viewSetup(); renderSync(); return; }
+  const v = {home:viewHome, log:viewLog, rem:viewRem, notes:viewNotes, grow:viewGrow}[state.tab] || viewHome;
+  $("#view").innerHTML = v();
+  renderSync();
+}
+
+/* ---------- Form paneli ---------- */
+function openSheet(title, body, onSave, onDelete){
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="sheet-bg" id="sheetBg"><form class="sheet" id="sheetForm" novalidate>
+    <div class="head"><h2>${esc(title)}</h2><button type="button" class="iconbtn" id="sheetX" aria-label="Kapat">${I.x}</button></div>
+    ${body}
+    <div class="actions">${onDelete?`<button type="button" class="btn danger" id="sheetDel">Sil</button>`:""}<button type="submit" class="btn primary">Kaydet</button></div>
+  </form></div>`;
+  const close = () => { layer.innerHTML=""; };
+  $("#sheetX").onclick = close;
+  $("#sheetBg").addEventListener("click", e => { if(e.target.id==="sheetBg") close(); });
+  if(onDelete){ let armed=false; $("#sheetDel").onclick = ev => { if(!armed){ armed=true; ev.target.textContent="Silmek için tekrar dokunun"; return; } onDelete(); close(); }; }
+  layer.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); seg.dataset.val = b.dataset.v;
+    seg.dispatchEvent(new Event("segchange"));
+  }));
+  $("#sheetForm").addEventListener("submit", e => { e.preventDefault(); if(onSave(new FormData(e.target), layer)!==false) close(); });
+}
+const seg = (name, opts, val) => `<div class="seg" data-name="${name}" data-val="${esc(val)}">${opts.map(([v,l])=>`<button type="button" data-v="${esc(v)}" aria-pressed="${v===val}">${esc(l)}</button>`).join("")}</div>`;
+const segVal = (layer,name) => layer.querySelector(`.seg[data-name="${name}"]`).dataset.val;
+
+const SUBS = {
+  feed:[["Emzirme · Sol","Sol göğüs"],["Emzirme · Sağ","Sağ göğüs"],["Biberon","Biberon (anne sütü)"],["Mama","Mama"],["Ek gıda","Ek gıda"]],
+  diaper:[["Islak","Islak"],["Kirli","Kirli"],["Islak + kirli","İkisi"]],
+  health:[["Ateş","Ateş"],["İlaç","İlaç"],["D vitamini","D vitamini"],["Demir","Demir"],["Banyo","Banyo"],["Diğer","Diğer"]]
+};
+function nextBreast(){ const lb = all("log").filter(l=>l.kind==="feed"&&/Emzirme/.test(l.sub||"")).sort((a,b)=>b.start-a.start)[0]; return lb && /Sol/.test(lb.sub) ? "Emzirme · Sağ" : "Emzirme · Sol"; }
+function amountLabel(kind, sub){ if(kind==="health") return sub==="Ateş"? "Derece (°C)" : null; if(kind==="feed") return /Emzirme/.test(sub)? "Süre (dk)" : sub==="Ek gıda"? null : "Miktar (ml)"; return null; }
+
+function openLog(kind, existing){
+  const l = existing || {id:uid(), type:"log", kind, t:Date.now(), start:Date.now()};
+  kind = l.kind;
+  const subs = SUBS[kind];
+  const sub0 = l.sub || (kind==="feed"? nextBreast() : subs? subs[0][0] : "");
+  const body = `
+    ${subs?`<div class="field"><span class="flabel">Tür</span>${seg("sub", subs, sub0)}</div>`:""}
+    <div class="grid2">
+      <div class="field"><label for="f-start">${kind==="sleep"?"Uyudu":"Saat"}</label><input id="f-start" name="start" type="datetime-local" value="${toLocalInput(l.start)}"></div>
+      ${kind==="sleep"?`<div class="field"><label for="f-end">Uyandı</label><input id="f-end" name="end" type="datetime-local" value="${l.end?toLocalInput(l.end):""}"></div>`
+        :`<div class="field" id="amtField"><label for="f-amt" id="amtLabel">Miktar</label><input id="f-amt" name="amount" inputmode="decimal" value="${esc(l.amount||"")}" placeholder="isteğe bağlı"></div>`}
+    </div>
+    <div class="field"><label for="f-note">Not</label><input id="f-note" name="note" value="${esc(l.note||"")}" placeholder="${kind==="feed"?"ör. havuç püresi, iyi yedi":"isteğe bağlı"}"></div>`;
+  openSheet((existing?"Düzenle: ":"")+KIND[kind].ad, body, (fd, layer) => {
+    const st = new Date(fd.get("start")).getTime() || Date.now();
+    const o = Object.assign({}, l, {start:st, note:(fd.get("note")||"").trim()});
+    delete o.ornek;
+    if(subs) o.sub = segVal(layer,"sub");
+    if(kind==="sleep"){ const e = fd.get("end"); o.end = e? new Date(e).getTime() : null; if(o.end && o.end<o.start){ toast("Uyanma saati uyuma saatinden önce olamaz."); return false; } }
+    else o.amount = (fd.get("amount")||"").toString().replace(",",".").trim();
+    put(o); toast(KIND[kind].ad+" kaydedildi");
+  }, existing? () => remove(l.id) : null);
+  const layer = $("#layer");
+  const upd = () => { const af = layer.querySelector("#amtField"); if(!af) return; const lab = amountLabel(kind, subs? segVal(layer,"sub") : ""); af.hidden = !lab; if(lab) layer.querySelector("#amtLabel").textContent = lab; };
+  const sg = layer.querySelector('.seg[data-name="sub"]'); if(sg) sg.addEventListener("segchange", upd); upd();
+}
+function quick(kind){
+  if(kind==="sleep"){
+    const s = all("log").find(l=>l.kind==="sleep"&&!l.end);
+    if(s){ put(Object.assign({}, s, {end:Date.now()})); toast("Uyandı · "+dur(Date.now()-s.start)+" uyudu"); }
+    else { put({id:uid(), type:"log", kind:"sleep", t:Date.now(), start:Date.now(), end:null}); toast("Uyku başladı, süre tutuluyor"); }
+    return;
+  }
+  quickPick(kind);
+}
+/* Anında kayıt: türe dokunmak şu anki saatle hemen kaydeder */
+function quickPick(kind){
+  const subs = SUBS[kind], rec = kind==="feed"? nextBreast() : null;
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet">
+    <div class="head"><div><h2>${esc(KIND[kind].ad)}</h2><div class="small muted num">Dokunduğunuz an ${hm(Date.now())} saatiyle kaydedilir</div></div><button type="button" class="iconbtn" id="sheetX" aria-label="Kapat">${I.x}</button></div>
+    <div class="pickgrid">${subs.map(([v,l])=>`<button type="button" class="pick ${KIND[kind].cls}" data-pick="${esc(v)}">${esc(l)}${v===rec?'<span class="small">sıradaki</span>':""}</button>`).join("")}</div>
+    <button type="button" class="btn" id="pickLater">Farklı saat veya ayrıntı girerek ekle</button>
+  </div></div>`;
+  const close = () => { layer.innerHTML=""; };
+  $("#sheetX").onclick = close;
+  $("#sheetBg").addEventListener("click", e => { if(e.target.id==="sheetBg") close(); });
+  $("#pickLater").onclick = () => { close(); openLog(kind); };
+  layer.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => {
+    put({id:uid(), type:"log", kind, t:Date.now(), start:Date.now(), sub:b.dataset.pick, note:"", amount:""});
+    close(); toast(b.dataset.pick+" · "+hm(Date.now())+" kaydedildi");
+  });
+}
+function chooseKind(){
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet">
+    <div class="head"><div><h2>Kayıt ekle</h2><div class="small muted">Saatini sonraki ekranda değiştirebilirsiniz</div></div><button type="button" class="iconbtn" id="sheetX" aria-label="Kapat">${I.x}</button></div>
+    <div class="pickgrid">${Object.entries(KIND).map(([k,v])=>`<button type="button" class="pick ${v.cls}" data-kind="${k}">${I[k]}${v.ad}</button>`).join("")}</div>
+  </div></div>`;
+  const close = () => { layer.innerHTML=""; };
+  $("#sheetX").onclick = close;
+  $("#sheetBg").addEventListener("click", e => { if(e.target.id==="sheetBg") close(); });
+  layer.querySelectorAll("[data-kind]").forEach(b => b.onclick = () => { close(); openLog(b.dataset.kind); });
+}
+function openRem(existing, preset){
+  const r = existing || Object.assign({id:uid(), type:"rem", t:Date.now(), title:"", mode:"daily", time:"09:00", every:3, date:ymd(new Date()), active:true}, preset||{});
+  const body = `
+    <div class="field"><label for="r-title">Başlık</label><input id="r-title" name="title" value="${esc(r.title)}" placeholder="ör. D vitamini" required></div>
+    <div class="field"><span class="flabel">Tekrar</span>${seg("mode", [["daily","Her gün"],["interval","Saat aralığıyla"],["once","Tek sefer"]], r.mode)}</div>
+    <div class="grid2">
+      <div class="field" id="r-timeF"><label for="r-time">Saat</label><input id="r-time" name="time" type="time" value="${esc(r.time)}"></div>
+      <div class="field" id="r-dateF"><label for="r-date">Tarih</label><input id="r-date" name="date" type="date" value="${esc(r.date)}"></div>
+      <div class="field" id="r-everyF"><label for="r-every">Kaç saatte bir</label><input id="r-every" name="every" type="number" min="0.5" step="0.5" value="${esc(r.every)}"></div>
+    </div>`;
+  openSheet(existing?"Hatırlatıcıyı düzenle":"Yeni hatırlatıcı", body, (fd, layer) => {
+    const title = (fd.get("title")||"").trim(); if(!title){ toast("Bir başlık yazın."); return false; }
+    const o = Object.assign({}, r, {title, mode:segVal(layer,"mode"), time:fd.get("time")||"09:00", date:fd.get("date")||ymd(new Date()), every:Number(fd.get("every"))||3});
+    delete o.ornek;
+    if(existing && (o.mode!==r.mode || o.time!==r.time || o.date!==r.date || o.every!==r.every)){ o.lastDone=null; o.t=Date.now(); }
+    put(o); toast("Hatırlatıcı kaydedildi"); askNotify();
+  }, existing? () => remove(r.id) : null);
+  const layer = $("#layer");
+  const upd = () => { const m = segVal(layer,"mode"); layer.querySelector("#r-timeF").hidden = m==="interval"; layer.querySelector("#r-dateF").hidden = m!=="once"; layer.querySelector("#r-everyF").hidden = m!=="interval"; };
+  layer.querySelector('.seg[data-name="mode"]').addEventListener("segchange", upd); upd();
+}
+function openNote(existing){
+  const n = existing || {id:uid(), type:"note", t:Date.now(), text:"", tag: state.noteFilter!=="all"? state.noteFilter : "genel", pinned:false};
+  const body = `
+    <div class="field"><span class="flabel">Etiket</span>${seg("tag", Object.entries(NTAGS), n.tag)}</div>
+    <div class="field"><label for="n-text">Not</label><textarea id="n-text" name="text" placeholder="ör. Ek gıdaya hangi sebzeyle başlayalım?">${esc(n.text)}</textarea></div>
+    <div class="field"><span class="flabel">Üstte sabitle</span>${seg("pin", [["0","Hayır"],["1","Evet"]], n.pinned?"1":"0")}</div>`;
+  openSheet(existing?"Notu düzenle":"Yeni not", body, (fd, layer) => {
+    const text = (fd.get("text")||"").trim(); if(!text){ toast("Not boş olamaz."); return false; }
+    const o = Object.assign({}, n, {text, tag:segVal(layer,"tag"), pinned:segVal(layer,"pin")==="1"}); delete o.ornek;
+    put(o); toast("Not kaydedildi");
+  }, existing? () => remove(n.id) : null);
+}
+function openGrow(){
+  const body = `
+    <div class="field"><label for="g-date">Tarih</label><input id="g-date" name="date" type="date" value="${ymd(new Date())}"></div>
+    <div class="grid2">
+      <div class="field"><label for="g-kg">Kilo (kg)</label><input id="g-kg" name="kg" inputmode="decimal" placeholder="7,2"></div>
+      <div class="field"><label for="g-cm">Boy (cm)</label><input id="g-cm" name="cm" inputmode="decimal" placeholder="65"></div>
+      <div class="field"><label for="g-head">Baş çevresi (cm)</label><input id="g-head" name="head" inputmode="decimal" placeholder="42"></div>
+    </div>
+    <div class="field"><label for="g-note">Not</label><input id="g-note" name="note" placeholder="ör. 5. ay kontrolü"></div>`;
+  openSheet("Yeni ölçüm", body, fd => {
+    const n = k => { const v = (fd.get(k)||"").toString().replace(",",".").trim(); return v && !isNaN(v) ? Number(v) : null; };
+    const o = {id:uid(), type:"grow", t:Date.now(), date:fd.get("date")||ymd(new Date()), kg:n("kg"), cm:n("cm"), head:n("head"), note:(fd.get("note")||"").trim()};
+    if(o.kg==null && o.cm==null && o.head==null){ toast("En az bir ölçü girin."); return false; }
+    put(o); toast("Ölçüm kaydedildi");
+  });
+}
+function openSettings(){
+  const s = state.settings;
+  const body = `
+    <div class="field"><label for="s-name">Bebeğin adı</label><input id="s-name" name="name" value="${esc(s.name)}" placeholder="ör. Deniz"></div>
+    <div class="field"><label for="s-birth">Doğum tarihi</label><input id="s-birth" name="birth" type="date" value="${esc(s.birth)}"></div>
+    <div class="field"><span class="flabel">Cinsiyet (büyüme grafiği için)</span>${seg("sex", [["k","Kız"],["e","Erkek"]], s.sex||"k")}</div>
+    <button type="button" class="btn" id="famBtn">Aile kodu ve diğer telefonu bağlama</button>`;
+  openSheet("Bebek bilgileri", body, (fd, layer) => {
+    saveSettings({name:(fd.get("name")||"").trim(), birth:fd.get("birth")||"", sex:segVal(layer,"sex")}); toast("Bilgiler kaydedildi");
+  });
+}
+
+/* ---------- Etkileşimler ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("button, [data-editnote]"); if(!b) return;
+  const d = b.dataset;
+  if(d.tab){ state.tab = d.tab; render(); window.scrollTo(0,0); return; }
+  if(d.go){ state.tab = d.go; render(); window.scrollTo(0,0); return; }
+  if(d.quick) return quick(d.quick);
+  if(d.wake){ const s=state.items.get(d.wake); if(s){ put(Object.assign({}, s, {end:Date.now()})); toast("Uyandı · "+dur(Date.now()-s.start)+" uyudu"); } return; }
+  if(d.editlog){ const l=state.items.get(d.editlog); if(l) openLog(l.kind, l); return; }
+  if(d.editrem){ const r=state.items.get(d.editrem); if(r) openRem(r); return; }
+  if(d.done){ const r=state.items.get(d.done); if(r){ markDone(r); toast("İşaretlendi"); } return; }
+  if(d.editnote){ const n=state.items.get(d.editnote); if(n) openNote(n); return; }
+  if(d.delgrow){ if(b.dataset.armed){ remove(d.delgrow); } else { b.dataset.armed="1"; b.style.color="var(--health)"; toast("Silmek için tekrar dokunun"); } return; }
+  if(d.vax){ const id="vax-"+d.vax, cur=state.items.get(id);
+    if(cur && cur.done) remove(id); else put({id, type:"vax", t:Date.now(), done:true, date:ymd(new Date())}); return; }
+  if(d.lf){ state.logFilter=d.lf; render(); return; }
+  if(d.nf){ state.noteFilter=d.nf; render(); return; }
+  if(d.preset){ const [title,mode,x] = d.preset.split("|"); openRem(null, mode==="interval"? {title,mode,every:Number(x)} : {title,mode,time:x}); return; }
+  if(b.id==="vaxPast"){ pastVax().forEach(v => put({id:"vax-"+v.k, type:"vax", t:Date.now(), done:true, date:ymd(vaxDueDate(v))})); toast("Geçmiş aşılar işaretlendi"); return; }
+  if(b.id==="addLog") return chooseKind();
+  if(b.id==="addRem") return openRem();
+  if(b.id==="addNote") return openNote();
+  if(b.id==="addGrow") return openGrow();
+  if(b.id==="settingsBtn") return openSettings();
+  if(b.id==="famBtn"){ $("#layer").innerHTML=""; return openFamily(); }
+  if(b.id==="clearEx"){ if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent="Emin misiniz? Tekrar dokunun"; return; }
+    [...state.items.values()].filter(i=>i.ornek).forEach(i=>remove(i.id)); toast("Örnekler silindi"); return; }
+});
+
+/* ---------- Uyarı (uygulama açıkken) ---------- */
+const alerted = new Set();
+let audioCtx = null;
+document.addEventListener("pointerdown", () => { try{ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); }catch(e){} }, {once:false, passive:true});
+function beep(){ try{ if(!audioCtx) return; [0,0.35].forEach(off => { const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.frequency.value=880; o.connect(g); g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime+off; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); o.start(t); o.stop(t+0.32); }); }catch(e){} }
+function askNotify(){ try{ if("Notification" in window && Notification.permission==="default") Notification.requestPermission().catch(()=>{}); }catch(e){} }
+function checkAlarms(){
+  if($("#alarm")) return;
+  for(const r of all("rem")){
+    if(r.active===false) continue;
+    const due = remDue(r); if(due==null) continue;
+    const key = r.id+"@"+due;
+    if(due<=Date.now() && Date.now()-due < 6*HOUR && !alerted.has(key)){
+      alerted.add(key); beep();
+      try{ if("Notification" in window && Notification.permission==="granted") new Notification("Minik Defter", {body:r.title}); }catch(e){}
+      const el = document.createElement("div"); el.className="alarm"; el.id="alarm";
+      el.innerHTML = `<div class="box"><div style="flex:1;min-width:0"><div style="font-weight:700">${esc(r.title)}</div><div class="small">Hatırlatıcı · ${hm(due)}</div></div><button id="alDone">Yapıldı</button><button id="alLater">Sonra</button></div>`;
+      document.body.appendChild(el);
+      el.querySelector("#alDone").onclick = () => { markDone(state.items.get(r.id)||r); el.remove(); };
+      el.querySelector("#alLater").onclick = () => el.remove();
+      break;
+    }
+  }
+}
+setInterval(() => { if(!$("#sheetBg")) render(); checkAlarms(); }, 30000);
+
+/* ---------- Başlat ---------- */
+loadLocal(); render();
+function boot(){ if(!family) return; connectLive(); flush(); sync(); }
+window.addEventListener("load", () => { boot(); checkAlarms(); });
+window.addEventListener("online", () => { flush(); sync(); });
+document.addEventListener("visibilitychange", () => { if(document.visibilityState==="visible"){ flush(); sync(); render(); checkAlarms(); } });
+setInterval(() => { if(document.visibilityState==="visible"){ flush(); sync(); } }, 60000);
+if("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+})();
+</script>
+</body>
+</html>
