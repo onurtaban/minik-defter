@@ -8,34 +8,41 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="theme-color" content="#2E3A87">
+<meta name="theme-color" content="#FFF4EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1513" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Minik Defter">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: tek sütunlu telefon uygulaması; üstte bebek kartı, altta sabit sekme çubuğu */
 :root{
-  --bg:#F2F3F7; --surface:#FFFFFF; --surface2:#E9EBF2; --ink:#1D2340; --muted:#646A88; --line:#DADDE8;
-  --accent:#2E3A87; --accent-ink:#FFFFFF;
-  --feed:#C9772E; --feed-bg:#FBEBDD; --sleep:#5560C4; --sleep-bg:#E6E8FA; --diaper:#2D8A7B; --diaper-bg:#DCF1ED; --health:#C2475F; --health-bg:#F9E1E6;
-  --ok:#2D8A7B; --warn:#B9761B;
-  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
-  --f-body:"Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r:14px;
+  --bg:#FFF6EF; --surface:#FFFFFF; --surface2:#FCEDE3; --ink:#3A2622; --muted:#8A6F68; --line:#F2E2D8;
+  --accent:#C9495C; --accent-ink:#FFFFFF; --accent-soft:#FDE4E6;
+  --feed:#C46A1A; --feed-bg:#FFEBD6; --sleep:#7357CC; --sleep-bg:#EFE9FF; --diaper:#2B8067; --diaper-bg:#DCF3EA; --health:#C23D57; --health-bg:#FFE3E8;
+  --ok:#2B8067; --warn:#B9761B;
+  --hero1:#FFE3D3; --hero2:#FFD3DC; --glass:rgba(255,255,255,.82);
+  --shadow:0 1px 2px rgba(90,45,30,.05), 0 8px 24px rgba(90,45,30,.07);
+  --f-display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:20px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12152A; --surface:#1B1F3A; --surface2:#262B4D; --ink:#ECEEFA; --muted:#A3A8C8; --line:#2F3459;
-  --accent:#AEB7FF; --accent-ink:#141833;
-  --feed:#F0A764; --feed-bg:#3A2A1E; --sleep:#A4ACFF; --sleep-bg:#272C55; --diaper:#6FD0BE; --diaper-bg:#173B37; --health:#F28A9E; --health-bg:#3F1F2A;
-  --ok:#6FD0BE; --warn:#F0B35A; color-scheme:dark}}
+  --bg:#1C1513; --surface:#2A201E; --surface2:#372B28; --ink:#F8ECE6; --muted:#C2A69E; --line:#43342F;
+  --accent:#FF8E9B; --accent-ink:#2B1015; --accent-soft:#4A2730;
+  --feed:#F5A960; --feed-bg:#3D2A19; --sleep:#B9A8FF; --sleep-bg:#2F2745; --diaper:#77D2B6; --diaper-bg:#1A3B32; --health:#FF8DA2; --health-bg:#46202A;
+  --ok:#77D2B6; --warn:#F0B35A;
+  --hero1:#3E2722; --hero2:#3E2230; --glass:rgba(42,32,30,.85);
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#12152A; --surface:#1B1F3A; --surface2:#262B4D; --ink:#ECEEFA; --muted:#A3A8C8; --line:#2F3459;
-  --accent:#AEB7FF; --accent-ink:#141833;
-  --feed:#F0A764; --feed-bg:#3A2A1E; --sleep:#A4ACFF; --sleep-bg:#272C55; --diaper:#6FD0BE; --diaper-bg:#173B37; --health:#F28A9E; --health-bg:#3F1F2A;
-  --ok:#6FD0BE; --warn:#F0B35A; color-scheme:dark}
+  --bg:#1C1513; --surface:#2A201E; --surface2:#372B28; --ink:#F8ECE6; --muted:#C2A69E; --line:#43342F;
+  --accent:#FF8E9B; --accent-ink:#2B1015; --accent-soft:#4A2730;
+  --feed:#F5A960; --feed-bg:#3D2A19; --sleep:#B9A8FF; --sleep-bg:#2F2745; --diaper:#77D2B6; --diaper-bg:#1A3B32; --health:#FF8DA2; --health-bg:#46202A;
+  --ok:#77D2B6; --warn:#F0B35A;
+  --hero1:#3E2722; --hero2:#3E2230; --glass:rgba(42,32,30,.85);
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 [hidden]{display:none!important}
@@ -190,6 +197,65 @@ details.tipd ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:c
 .hbar .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
 .legend2{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend2 span{display:inline-flex;align-items:center;gap:5px}
+
+/* ---------- Modern sıcak tema ---------- */
+body{font-size:15.5px;padding-block:0 calc(110px + env(safe-area-inset-bottom, 0px))}
+h1,h2,h3{letter-spacing:0;line-height:1.2}
+h2{font-size:21px}
+#view{gap:24px}
+.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2));border-radius:26px;padding:16px 16px 16px 14px;box-shadow:var(--shadow)}
+.hero-l{display:flex;gap:14px;align-items:center;min-width:0}
+.hero-l > div:last-child{min-width:0}
+.avatar{width:54px;height:54px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:26px;color:var(--accent);flex:none;box-shadow:var(--shadow);padding-top:3px}
+.hero h1{font-size:28px}
+.age{color:var(--ink);opacity:.72;font-family:var(--f-body);font-weight:600;font-size:14px}
+.iconbtn{border:0;background:var(--glass);box-shadow:var(--shadow);width:44px;height:44px}
+.sheet .iconbtn{background:var(--surface2);box-shadow:none}
+.list,.since,.stat,.tip,.empty,.chartbox,.chartcard,.tile,.rp-nav,details.tipd,.setup .card,.banner{border-radius:var(--r);box-shadow:var(--shadow)}
+.banner{background:var(--accent-soft)}
+.row{padding:13px 16px}
+.dot{border-radius:14px;width:38px;height:38px}
+.qbtn,.qbtn.k-feed,.qbtn.k-sleep,.qbtn.k-diaper,.qbtn.k-health{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);border-radius:22px;padding:12px 2px 11px;gap:6px;font-size:13px;font-weight:700}
+.qbtn svg{width:48px;height:48px;padding:12px;border-radius:50%;transition:transform .15s}
+.qbtn.k-feed svg{background:var(--feed-bg);color:var(--feed)} .qbtn.k-sleep svg{background:var(--sleep-bg);color:var(--sleep)}
+.qbtn.k-diaper svg{background:var(--diaper-bg);color:var(--diaper)} .qbtn.k-health svg{background:var(--health-bg);color:var(--health)}
+.qbtn:active svg{transform:scale(.92)}
+.qbtn.live{outline:0;box-shadow:inset 0 0 0 2px var(--sleep), var(--shadow)}
+.qbtn.live svg{background:var(--sleep);color:var(--surface)}
+.since{padding:14px 16px;gap:8px}
+.stat{padding:12px 14px}
+.stat .v,.tile .v{font-size:26px;line-height:1.1}
+.tip{background:linear-gradient(135deg,var(--surface),var(--surface2));padding:16px}
+.link{color:var(--accent);font-weight:800}
+.mini{border:0;background:var(--surface2);padding:7px 14px}
+.mini.primary,.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn{border-radius:16px;padding:14px;font-weight:800}
+.chip{border:0;background:var(--surface);box-shadow:var(--shadow);padding:7px 14px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.seg button{border-radius:12px;border-color:var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.field input,.field select,.field textarea{border-radius:14px;padding:12px 14px;border:1.5px solid var(--line)}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--accent)}
+.sheet{border-radius:28px 28px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.12)}
+.sheet::before{content:"";width:42px;height:5px;border-radius:3px;background:var(--line);align-self:center;margin:-8px 0 -4px;flex:none}
+.sheet-bg{background:rgba(40,20,15,.38)}
+.pick{border-radius:18px}
+nav.tabs{left:max(12px, env(safe-area-inset-left, 0px));right:max(12px, env(safe-area-inset-right, 0px));bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+  border:0;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);box-shadow:0 10px 34px rgba(90,45,30,.16);padding:6px}
+nav.tabs .in{max-width:536px}
+nav.tabs button{border-radius:18px;padding:7px 0 6px;font-size:11px;font-weight:800}
+nav.tabs button svg{width:21px;height:21px}
+nav.tabs button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.toast{bottom:calc(100px + env(safe-area-inset-bottom, 0px));border-radius:16px}
+.alarm{padding-bottom:calc(104px + env(safe-area-inset-bottom, 0px))}
+.alarm .box{border-radius:20px}
+.unitseg{border-radius:16px;background:var(--surface2)}
+.unitseg button{border-radius:12px}
+.unitseg button[aria-pressed="true"]{box-shadow:var(--shadow)}
+.rp-nav button{border-radius:12px}
+.code{border-radius:14px}
+.empty{color:var(--muted)}
+@media (prefers-reduced-motion: no-preference){ #view > *{animation:fadein .25s ease-out both} @keyframes fadein{from{opacity:.4;transform:translateY(4px)}} }
 </style>
 <script src="vendor/supabase.js" defer></script>
 </head>
@@ -197,9 +263,10 @@ details.tipd ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:c
 
 <div class="wrap" id="app">
   <header class="hero">
-    <div>
-      <h1 id="babyName">Bebeğiniz</h1>
-      <div class="age num" id="babyAge">Doğum tarihini ayarlardan girin</div>
+    <div class="hero-l">
+      <div class="avatar" id="babyAvatar" aria-hidden="true">M</div>
+      <div><h1 id="babyName">Bebeğiniz</h1>
+      <div class="age num" id="babyAge">Doğum tarihini ayarlardan girin</div></div>
     </div>
     <button class="iconbtn" id="settingsBtn" aria-label="Bebek bilgileri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
   </header>
@@ -879,6 +946,7 @@ function openFamily(){
 
 function render(){
   $("#babyName").textContent = state.settings.name || "Bebeğiniz";
+  $("#babyAvatar").textContent = (family && state.settings.name ? state.settings.name.trim()[0] : "M").toLocaleUpperCase("tr");
   $("#babyAge").textContent = ageText();
   renderTabs();
   $("nav.tabs").hidden = !family; $("#settingsBtn").hidden = !family;
