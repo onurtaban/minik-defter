@@ -115,8 +115,8 @@ button{cursor:pointer}
 /* Sekme çubuğu */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:20;
   padding-bottom:env(safe-area-inset-bottom, 0px);padding-left:max(8px, env(safe-area-inset-left, 0px));padding-right:max(8px, env(safe-area-inset-right, 0px))}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-nav.tabs button{background:none;border:0;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--muted)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs button{background:none;border:0;padding:8px 0 10px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent)}
 
@@ -163,6 +163,33 @@ details.tipd ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:c
 .setup .card{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
 .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;letter-spacing:.12em;font-weight:700;background:var(--surface2);border-radius:10px;padding:10px 12px;text-align:center;user-select:all;overflow-wrap:anywhere}
 .errtext{color:var(--health);font-size:13px;font-weight:700}
+/* Raporlar */
+.rp-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border-radius:var(--r);padding:6px}
+.rp-nav .lbl{font-family:var(--f-display);font-weight:700;font-size:16px;text-align:center;flex:1;min-width:0}
+.rp-nav button{border:0;background:var(--surface2);border-radius:10px;width:40px;height:36px;font-size:18px;font-weight:700}
+.rp-nav button:disabled{opacity:.35}
+.unitseg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface2);border-radius:12px;padding:4px}
+.unitseg button{border:0;background:none;border-radius:9px;padding:8px 0;font-weight:700;font-size:14px;color:var(--muted)}
+.unitseg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--surface);border-radius:var(--r);padding:12px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tile .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;display:flex;align-items:center;gap:6px}
+.tile .l i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.tile .v{font-family:var(--f-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.tile .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chartcard{background:var(--surface);border-radius:var(--r);padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.chartcard h3{font-size:15px}
+.chartcard svg{width:100%;height:auto;display:block;overflow:visible}
+.tipline{font-size:13px;color:var(--muted);min-height:19px;font-variant-numeric:tabular-nums}
+.tipline b{color:var(--ink)}
+[data-tip]{cursor:pointer}
+.hbar{display:grid;grid-template-columns:minmax(80px,auto) 1fr 34px;gap:8px;align-items:center;font-size:13px}
+.hbar .track{height:12px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.hbar .fill{height:100%;border-radius:0 4px 4px 0}
+.hbar .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.legend2{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend2 span{display:inline-flex;align-items:center;gap:5px}
 </style>
 <script src="vendor/supabase.js" defer></script>
 </head>
@@ -196,6 +223,7 @@ const I = {
   log:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg>',
   grow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
@@ -223,7 +251,7 @@ function toLocalInput(ts){ const d=new Date(ts); return ymd(d)+"T"+pad(d.getHour
 
 /* ---------- Durum ve depolama ---------- */
 const LS_KEY = "minik-defter-v1";
-const state = { settings:{name:"", birth:"", sex:"k"}, items:new Map(), tab:"home", logFilter:"all", noteFilter:"all", shared:false, loaded:false };
+const state = { settings:{name:"", birth:"", sex:"k"}, items:new Map(), tab:"home", rp:{unit:"week", anchor:Date.now()}, logFilter:"all", noteFilter:"all", shared:false, loaded:false };
 /* ---------- Eşitleme (Supabase) ---------- */
 const SB_URL = "https://kbzquokuyrfmweoeyfdp.supabase.co";
 const SB_KEY = "sb_publishable_1hXBaii737jcIeyAqIWKjQ_ycaU-iSh";
@@ -430,7 +458,7 @@ const DAILY_TIPS = [
 ];
 
 /* ---------- Ekranlar ---------- */
-const TABS = [["home","Bugün",I.home],["log","Kayıtlar",I.log],["rem","Hatırlatıcı",I.bell],["notes","Notlar",I.note],["grow","Gelişim",I.grow]];
+const TABS = [["home","Bugün",I.home],["log","Kayıtlar",I.log],["rem","Hatırlat",I.bell],["notes","Notlar",I.note],["grow","Gelişim",I.grow],["report","Rapor",I.chart]];
 function renderTabs(){
   $("#tabs").innerHTML = TABS.map(([k,l,ic]) => `<button data-tab="${k}" ${state.tab===k?'aria-current="page"':""}>${ic}<span>${l}</span></button>`).join("");
 }
@@ -584,6 +612,192 @@ function viewGrow(){
   </section>`;
 }
 
+
+/* ---------- Raporlar ---------- */
+const AYLAR_UZUN = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const GUNLER = ["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+const COL = {feed:"var(--feed)", sleep:"var(--sleep)", diaper:"var(--diaper)", health:"var(--health)"};
+function rpRange(unit, anchor){
+  unit = unit||state.rp.unit; const a = new Date(anchor==null? state.rp.anchor : anchor); a.setHours(0,0,0,0);
+  let s, e;
+  if(unit==="day"){ s = new Date(a); e = new Date(a); e.setDate(e.getDate()+1); }
+  else if(unit==="week"){ s = new Date(a); s.setDate(s.getDate()-((s.getDay()+6)%7)); e = new Date(s); e.setDate(e.getDate()+7); }
+  else if(unit==="month"){ s = new Date(a.getFullYear(), a.getMonth(), 1); e = new Date(a.getFullYear(), a.getMonth()+1, 1); }
+  else { s = new Date(a.getFullYear(), 0, 1); e = new Date(a.getFullYear()+1, 0, 1); }
+  return [s.getTime(), e.getTime()];
+}
+function shiftAnchor(anchor, unit, dir){
+  const d = new Date(anchor);
+  if(unit==="day") d.setDate(d.getDate()+dir); else if(unit==="week") d.setDate(d.getDate()+7*dir);
+  else if(unit==="month"){ d.setDate(1); d.setMonth(d.getMonth()+dir); } else d.setFullYear(d.getFullYear()+dir);
+  return d.getTime();
+}
+function rpShift(dir){ const n = shiftAnchor(state.rp.anchor, state.rp.unit, dir); if(dir>0 && rpRange(state.rp.unit, n)[0] > Date.now()) return; state.rp.anchor = n; }
+function rpLabel(){
+  const [s,e] = rpRange(), S = new Date(s), E = new Date(e-1), u = state.rp.unit;
+  if(u==="day"){ const t = dayLabel(s); return (t==="Bugün"||t==="Dün"? t+", " : GUNLER[S.getDay()]+" ") + S.getDate()+" "+AYLAR[S.getMonth()]; }
+  if(u==="week") return S.getDate()+" "+AYLAR[S.getMonth()]+" – "+E.getDate()+" "+AYLAR[E.getMonth()];
+  if(u==="month") return AYLAR_UZUN[S.getMonth()]+" "+S.getFullYear();
+  return String(S.getFullYear());
+}
+function dayStats(bs, be, logs){
+  const o = {sleep:0, feeds:0, diapers:0, ml:0, wet:0, dirty:0, any:false}, now = Date.now();
+  for(const l of logs){
+    if(l.kind==="sleep"){ const st = Math.max(l.start, bs), en = Math.min(l.end||now, be); if(en>st){ o.sleep += en-st; o.any = true; } continue; }
+    if(l.start<bs || l.start>=be) continue;
+    o.any = true;
+    if(l.kind==="feed"){ o.feeds++; if((l.sub==="Biberon"||l.sub==="Mama") && l.amount) o.ml += Number(l.amount)||0; }
+    else if(l.kind==="diaper"){ o.diapers++; if(/Islak/.test(l.sub||"")) o.wet++; if(/irli/.test(l.sub||"")) o.dirty++; }
+  }
+  return o;
+}
+function daysIn(s, e, logs){
+  const out = []; let d = new Date(s);
+  const rel = logs.filter(l => (l.end||Date.now()) >= s - DAY && l.start < e);
+  while(d.getTime() < e){ const n = new Date(d); n.setDate(n.getDate()+1); out.push(Object.assign({s:d.getTime(), e:n.getTime()}, dayStats(d.getTime(), n.getTime(), rel))); d = n; }
+  return out;
+}
+function avgOf(days){
+  const act = days.filter(d => d.any), n = act.length || 1, sum = k => act.reduce((a,d)=>a+d[k],0);
+  return {n:act.length, sleep:sum("sleep")/n, feeds:sum("feeds")/n, diapers:sum("diapers")/n, ml:sum("ml")/n, wet:sum("wet"), dirty:sum("dirty")};
+}
+const f1 = v => (Math.round(v*10)/10).toString().replace(".",",");
+const fh = ms => f1(ms/HOUR);
+function niceStep(max, count){ const raw = max/count, p = Math.pow(10, Math.floor(Math.log10(raw||1))); for(const m of [1,2,2.5,5,10]) if(m*p >= raw) return m*p; return 10*p; }
+function barChart(data, color, fmt){
+  const W=320, H=160, L=28, R=4, T=8, B=20, n = data.length;
+  const max = Math.max(...data.map(d=>d.v), 0);
+  const step = niceStep(max||1, 3), top = Math.max(step, Math.ceil((max||1)/step)*step);
+  const y = v => T + (1 - v/top)*(H-T-B), bw = (W-L-R)/n, gap = Math.max(2, bw*0.28), w = bw-gap;
+  const every = n>16 ? 5 : 1;
+  let g = "";
+  for(let v=0; v<=top+1e-9; v+=step) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-5}" y="${y(v)+3.5}" text-anchor="end" font-size="9.5" fill="var(--muted)">${fmt.axis(v)}</text>`;
+  data.forEach((d,i) => {
+    const x = L + i*bw + gap/2, h = (H-T-B) - (y(d.v)-T);
+    if(d.v>0){ const r = Math.min(4, w/2, h); const yt = y(d.v), yb = H-B;
+      g += `<path d="M${x},${yb}V${yt+r}Q${x},${yt} ${x+r},${yt}H${x+w-r}Q${x+w},${yt} ${x+w},${yt+r}V${yb}Z" fill="${color}" opacity="${d.partial?0.55:1}"/>`; }
+    if(i%every===0 || n<=16) g += `<text x="${x+w/2}" y="${H-6}" text-anchor="middle" font-size="9.5" fill="var(--muted)">${esc(d.short)}</text>`;
+    g += `<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${H-T}" fill="transparent" data-tip="${esc(d.label+": "+fmt.tip(d.v))}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function chartCard(title, svg, deflt, extra){
+  return `<div class="chartcard"><h3>${esc(title)}</h3>${extra||""}${svg}<div class="tipline">${deflt}</div></div>`;
+}
+function dayTimeline(s, logs){
+  const rows = [["sleep","Uyku"],["feed","Beslenme"],["diaper","Bez"],["health","Sağlık"]];
+  const W=320, L=60, R=6, RH=28, T=4, H = T + rows.length*RH + 18, e = s + DAY;
+  const x = t => L + Math.max(0, Math.min(1, (t-s)/DAY))*(W-L-R);
+  let g = "";
+  for(let h=0; h<=24; h+=6) g += `<line x1="${x(s+h*HOUR)}" x2="${x(s+h*HOUR)}" y1="${T}" y2="${T+rows.length*RH}" stroke="var(--line)" stroke-width="1"/><text x="${x(s+h*HOUR)}" y="${H-4}" text-anchor="middle" font-size="9.5" fill="var(--muted)">${pad(h)}:00</text>`;
+  if(startOfDay(Date.now())===s) g += `<line x1="${x(Date.now())}" x2="${x(Date.now())}" y1="${T}" y2="${T+rows.length*RH}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 3"/>`;
+  rows.forEach(([k,l],ri) => {
+    const cy = T + ri*RH + RH/2;
+    g += `<text x="0" y="${cy+4}" font-size="11" font-weight="700" fill="var(--ink)">${l}</text>`;
+    logs.filter(o=>o.kind===k).forEach(o => {
+      if(k==="sleep"){ const a = Math.max(o.start,s), b = Math.min(o.end||Date.now(), e); if(b<=a) return;
+        g += `<rect x="${x(a)}" y="${cy-7}" width="${Math.max(3, x(b)-x(a))}" height="14" rx="4" fill="${COL.sleep}" data-tip="${esc("Uyku "+hm(o.start)+" – "+(o.end?hm(o.end):"devam ediyor")+" · "+dur((o.end||Date.now())-o.start))}"/>`; }
+      else { if(o.start<s||o.start>=e) return;
+        g += `<circle cx="${x(o.start)}" cy="${cy}" r="5.5" fill="${COL[k]}" stroke="var(--surface)" stroke-width="2" data-tip="${esc((o.sub||KIND[k].ad)+" · "+hm(o.start)+(o.amount? " · "+o.amount+(k==="health"?" °C":/Emzirme/.test(o.sub||"")?" dk":" ml"):""))}"/>`; }
+    });
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Günün zaman çizelgesi">${g}</svg>`;
+}
+function weekPattern(s, logs){
+  const W=320, L=44, R=6, RH=24, T=4, H = T + 7*RH + 18;
+  const x = f => L + f*(W-L-R);
+  let g = "";
+  for(let h=0; h<=24; h+=6) g += `<line x1="${x(h/24)}" x2="${x(h/24)}" y1="${T}" y2="${T+7*RH}" stroke="var(--line)" stroke-width="1"/><text x="${x(h/24)}" y="${H-4}" text-anchor="middle" font-size="9.5" fill="var(--muted)">${pad(h)}</text>`;
+  for(let i=0;i<7;i++){
+    const d = new Date(s); d.setDate(d.getDate()+i); const ds = d.getTime(), n = new Date(d); n.setDate(n.getDate()+1); const de = n.getTime(), cy = T + i*RH + RH/2;
+    g += `<text x="0" y="${cy+4}" font-size="11" font-weight="700" fill="var(--ink)">${GUNLER[d.getDay()]} ${d.getDate()}</text>`;
+    logs.forEach(o => {
+      if(o.kind==="sleep"){ const a = Math.max(o.start,ds), b = Math.min(o.end||Date.now(), de); if(b<=a) return;
+        g += `<rect x="${x((a-ds)/(de-ds))}" y="${cy-8}" width="${Math.max(2, x((b-ds)/(de-ds))-x((a-ds)/(de-ds)))}" height="16" rx="3" fill="${COL.sleep}" data-tip="${esc(GUNLER[d.getDay()]+" "+d.getDate()+" "+AYLAR[d.getMonth()]+" · uyku "+hm(o.start)+" – "+(o.end?hm(o.end):"devam ediyor"))}"/>`; }
+      else if(o.kind==="feed" && o.start>=ds && o.start<de){
+        g += `<circle cx="${x((o.start-ds)/(de-ds))}" cy="${cy}" r="4" fill="${COL.feed}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(GUNLER[d.getDay()]+" "+d.getDate()+" "+AYLAR[d.getMonth()]+" · "+(o.sub||"Beslenme")+" "+hm(o.start))}"/>`; }
+    });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Haftalık uyku ve beslenme düzeni">${g}</svg>`;
+}
+function hbars(rows, color){
+  const max = Math.max(1, ...rows.map(r=>r[1]));
+  return rows.filter(r=>r[1]>0).map(([l,v]) => `<div class="hbar"><span>${esc(l)}</span><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%;background:${color}"></div></div><span class="n">${v}</span></div>`).join("") || `<div class="small muted">Bu dönemde kayıt yok.</div>`;
+}
+function feverChart(list){
+  const W=320, H=130, L=30, R=8, T=8, B=20;
+  const s = list[0].start, e = list[list.length-1].start, span = Math.max(HOUR, e-s);
+  const lo = 35.5, hi = Math.max(40, ...list.map(l=>Number(l.amount)+0.3));
+  const x = t => L + (list.length===1? 0.5 : (t-s)/span)*(W-L-R), y = v => T + (1-(v-lo)/(hi-lo))*(H-T-B);
+  let g = "";
+  for(const v of [36,37,38,39,40]) if(v<=hi) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"${v===38?' stroke-dasharray="4 3" stroke="var(--muted)"':""}/><text x="${L-5}" y="${y(v)+3.5}" text-anchor="end" font-size="9.5" fill="var(--muted)">${v}</text>`;
+  g += `<path d="${list.map((l,i)=>(i?"L":"M")+x(l.start).toFixed(1)+","+y(Number(l.amount)).toFixed(1)).join("")}" fill="none" stroke="${COL.health}" stroke-width="2"/>`;
+  list.forEach(l => g += `<circle cx="${x(l.start)}" cy="${y(Number(l.amount))}" r="4.5" fill="${COL.health}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(dayLabel(l.start)+" "+hm(l.start)+": "+String(l.amount).replace(".",",")+" °C")}"/>`);
+  g += `<text x="${W-R}" y="${y(38)-4}" text-anchor="end" font-size="9.5" fill="var(--muted)">38 °C</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ateş ölçümleri">${g}</svg>`;
+}
+function viewReport(){
+  const u = state.rp.unit, [s,e] = rpRange(), logs = all("log");
+  const inRange = logs.filter(l => (l.end||l.start||0) >= s && l.start < e);
+  const days = daysIn(s, Math.min(e, startOfDay(Date.now())+DAY), logs);
+  const cur = avgOf(days);
+  const [ps,pe] = rpRange(u, shiftAnchor(state.rp.anchor, u, -1));
+  const prev = u==="day"? null : avgOf(daysIn(ps, pe, logs));
+  const prevName = {week:"geçen hafta", month:"geçen ay", year:"geçen yıl"}[u];
+  const nextDisabled = rpRange(u, shiftAnchor(state.rp.anchor, u, 1))[0] > Date.now();
+  const isDay = u==="day";
+  const tile = (k, label, val, unit, prevVal) => `<div class="tile"><div class="l"><i style="background:${COL[k]}"></i>${label}</div><div class="v">${val}<small> ${unit}</small></div>${prev && prev.n && cur.n ? `<div class="d">${prevName}: ${prevVal}</div>` : `<div class="d">&nbsp;</div>`}</div>`;
+  const per = isDay? "" : "/gün";
+  let html = `<section class="section">
+    <div class="sec-head"><h2>Raporlar</h2>${isDay||startOfDay(Date.now())>=s&&Date.now()<e ? "" : `<button class="link" data-rtoday="1">Bugüne dön</button>`}</div>
+    <div class="unitseg" role="group" aria-label="Dönem">${[["day","Gün"],["week","Hafta"],["month","Ay"],["year","Yıl"]].map(([k,l])=>`<button data-ru="${k}" aria-pressed="${u===k}">${l}</button>`).join("")}</div>
+    <div class="rp-nav"><button data-rnav="-1" aria-label="Önceki">‹</button><div class="lbl num">${esc(rpLabel())}</div><button data-rnav="1" aria-label="Sonraki" ${nextDisabled?"disabled":""}>›</button></div>`;
+  if(!inRange.length){ return html + `<div class="empty">Bu dönemde kayıt yok. Önceki dönemlere oklarla bakabilirsiniz.</div></section>`; }
+  html += `<div class="tiles">
+      ${tile("sleep","Uyku", fh(cur.sleep), "sa"+per, prev? fh(prev.sleep)+" sa" : "")}
+      ${tile("feed","Beslenme", f1(cur.feeds), isDay?"kez":"kez/gün", prev? f1(prev.feeds) : "")}
+      ${tile("diaper","Bez", f1(cur.diapers), isDay?"adet":"adet/gün", prev? f1(prev.diapers) : "")}
+      ${tile("feed","Biberon / mama", Math.round(cur.ml), "ml"+per, prev? Math.round(prev.ml)+" ml" : "")}
+    </div>
+    ${!isDay && cur.n ? `<div class="small muted">Ortalamalar kayıt girilmiş ${cur.n} güne göre hesaplanır.</div>` : ""}`;
+  const hint = `Ayrıntı için bir çubuğa veya noktaya dokunun.`;
+  if(isDay){
+    html += chartCard("Günün akışı", dayTimeline(s, inRange), hint);
+  } else {
+    let buckets;
+    if(u==="year"){
+      const Y = new Date(s).getFullYear();
+      buckets = AYLAR.map((m,i) => { const bs = new Date(Y,i,1).getTime(), be = new Date(Y,i+1,1).getTime(); const a = avgOf(days.filter(d=>d.s>=bs && d.s<be)); return {short:m, label:AYLAR_UZUN[i]+" (günlük ort.)", a, partial: bs<=Date.now() && Date.now()<be}; });
+    } else {
+      buckets = days.map(d => { const D = new Date(d.s); return {short: u==="week"? GUNLER[D.getDay()] : String(D.getDate()), label: GUNLER[D.getDay()]+" "+D.getDate()+" "+AYLAR[D.getMonth()], a:d, partial: d.s===startOfDay(Date.now())}; });
+      if(u==="week") while(buckets.length<7){ const D = new Date(s); D.setDate(D.getDate()+buckets.length); buckets.push({short:GUNLER[D.getDay()], label:"", a:{sleep:0,feeds:0,diapers:0,ml:0}, future:true}); }
+      if(u==="month"){ const D = new Date(s), last = new Date(D.getFullYear(), D.getMonth()+1, 0).getDate(); for(let i=buckets.length+1;i<=last;i++) buckets.push({short:String(i), label:"", a:{sleep:0,feeds:0,diapers:0,ml:0}, future:true}); }
+    }
+    const mk = (key, div) => buckets.map(b => ({short:b.short, label:b.future? b.short+" (henüz gelmedi)" : b.label, v: (b.a[key]||0)/(div||1), partial:b.partial}));
+    const fmtH = {axis: v => String(Math.round(v*10)/10).replace(".",","), tip: v => f1(v)+" sa"};
+    const fmtN = {axis: v => String(Math.round(v*10)/10).replace(".",","), tip: v => f1(v)};
+    const partialNote = buckets.some(b=>b.partial) ? " Soluk çubuk henüz bitmemiş günü/ayı gösterir." : "";
+    html += chartCard("Uyku (saat)", barChart(mk("sleep", HOUR), COL.sleep, fmtH), hint+partialNote);
+    if(u==="week") html += chartCard("Uyku ve beslenme düzeni", weekPattern(s, inRange), hint, `<div class="legend2"><span><svg width="16" height="10"><rect width="16" height="10" rx="3" fill="${COL.sleep}"/></svg>Uyku</span><span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="${COL.feed}"/></svg>Beslenme</span></div>`);
+    html += chartCard("Beslenme (kez)", barChart(mk("feeds"), COL.feed, {axis:fmtN.axis, tip:v=>f1(v)+" kez"}), hint);
+    if(cur.ml>0) html += chartCard("Biberon ve mama (ml)", barChart(mk("ml"), COL.feed, {axis:v=>String(Math.round(v)), tip:v=>Math.round(v)+" ml"}), hint);
+    html += chartCard("Bez (adet)", barChart(mk("diapers"), COL.diaper, {axis:fmtN.axis, tip:v=>f1(v)+" adet"}), hint);
+  }
+  const feedRows = SUBS.feed.map(([v,l]) => [l, inRange.filter(o=>o.kind==="feed" && o.sub===v && o.start>=s).length]);
+  const diaperRows = SUBS.diaper.map(([v,l]) => [l, inRange.filter(o=>o.kind==="diaper" && o.sub===v && o.start>=s).length]);
+  html += `<div class="chartcard"><h3>Beslenme türleri</h3>${hbars(feedRows, COL.feed)}</div>`;
+  html += `<div class="chartcard"><h3>Bez türleri</h3>${hbars(diaperRows, COL.diaper)}</div>`;
+  const fever = inRange.filter(o=>o.kind==="health" && o.sub==="Ateş" && Number(o.amount)>30 && o.start>=s).sort((a,b)=>a.start-b.start);
+  if(fever.length) html += chartCard("Ateş ölçümleri (°C)", feverChart(fever), "Kesikli çizgi 38 °C'yi gösterir. "+hint);
+  html += `<div class="small muted">Kilo ve boy grafiği Gelişim sekmesinde.</div></section>`;
+  return html;
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tip]"); if(!t) return;
+  const card = t.closest(".chartcard"); if(!card) return;
+  const line = card.querySelector(".tipline"); if(line) line.innerHTML = "<b>"+esc(t.getAttribute("data-tip"))+"</b>";
+});
+
 function viewSetup(){
   return `<div class="setup">
     <p class="muted" style="margin:0">Minik Defter'i iki telefonda ortak kullanmak için bir <b>aile kodu</b> kullanılır. Bir telefonda yeni defter oluşturun, diğerinde aynı kodu girin.</p>
@@ -669,7 +883,7 @@ function render(){
   renderTabs();
   $("nav.tabs").hidden = !family; $("#settingsBtn").hidden = !family;
   if(!family){ $("#babyName").textContent = "Minik Defter"; $("#babyAge").textContent = "Bebek bakım defteri"; $("#view").innerHTML = viewSetup(); renderSync(); return; }
-  const v = {home:viewHome, log:viewLog, rem:viewRem, notes:viewNotes, grow:viewGrow}[state.tab] || viewHome;
+  const v = {home:viewHome, log:viewLog, rem:viewRem, notes:viewNotes, grow:viewGrow, report:viewReport}[state.tab] || viewHome;
   $("#view").innerHTML = v();
   renderSync();
 }
@@ -846,6 +1060,9 @@ document.addEventListener("click", e => {
     if(cur && cur.done) remove(id); else put({id, type:"vax", t:Date.now(), done:true, date:ymd(new Date())}); return; }
   if(d.lf){ state.logFilter=d.lf; render(); return; }
   if(d.nf){ state.noteFilter=d.nf; render(); return; }
+  if(d.ru){ state.rp.unit=d.ru; render(); return; }
+  if(d.rnav){ rpShift(Number(d.rnav)); render(); return; }
+  if(d.rtoday){ state.rp.anchor=Date.now(); render(); return; }
   if(d.preset){ const [title,mode,x] = d.preset.split("|"); openRem(null, mode==="interval"? {title,mode,every:Number(x)} : {title,mode,time:x}); return; }
   if(b.id==="vaxPast"){ pastVax().forEach(v => put({id:"vax-"+v.k, type:"vax", t:Date.now(), done:true, date:ymd(vaxDueDate(v))})); toast("Geçmiş aşılar işaretlendi"); return; }
   if(b.id==="addLog") return chooseKind();
